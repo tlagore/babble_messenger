@@ -1,0 +1,141 @@
+body{
+    height: 100%;
+}
+
+div{
+    box-sizing: border-box;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.body-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.auto-height{
+    height: auto;
+}
+
+.content-container{
+    display: flex;
+    color: green;
+    height: 100%;
+    width: 100%;
+}
+
+.message-area{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+.send-message-area{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direciton:row;
+    width: 100%;
+    height: 15%;
+}
+
+#messages{
+    height: 85%;
+    width: 100%;
+}
+
+#users{
+    width: 15%;
+}
+
+#message{
+    width: 80%;
+    height: 50%;
+}
+
+#submit-message{
+    width: 15%;
+    height: 50%;
+}
+
+
+.col5{
+    height: 5%;
+}
+
+.col20{
+    height: 20%;
+}
+
+.col25{
+    height: 25%;
+}
+
+.col30{
+    height: 30%;
+}
+
+.col35{
+    height: 35%;
+}
+
+.col40{
+    height: 40%;
+}
+
+.col45{
+    height: 45%;
+}
+
+.col50{
+    height: 50%;
+}
+
+.col55{
+    height: 55%;
+}
+
+.col60{
+    height: 60%;
+}
+
+.col65{
+    height: 65%;
+}
+
+.col70{
+    height: 70%;
+}
+
+.col75{
+    height: 75%;
+}
+
+.col80{
+    height: 80%;
+}
+
+.col85{
+    height: 85%;
+}
+
+.col90{
+    height: 90%;
+}
+
+.col95{
+    height: 95%;
+}
+
+.col100{
+    height: 100%;
+}
+
