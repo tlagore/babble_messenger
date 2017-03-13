@@ -100,6 +100,7 @@ h1, h2, h3, h4, h5{
 .message{
     display: flex;
     flex-direction: column;
+    padding-bottom:1%;
 }
 
 .message-header{
@@ -107,12 +108,12 @@ h1, h2, h3, h4, h5{
 }
 
 .message-user{
-    font-size: calc(12px + .3vw);
+    font-size: calc(14px + .4vw);
     color: #00ace6;
 }
 
 .message-time{
-    font-size: calc(9px + .1vw);
+    font-size: calc(12px + .2vw);
     padding-left: 1%;
     color: #007399;
     bottom: 0;
@@ -120,7 +121,7 @@ h1, h2, h3, h4, h5{
 
 .message-content{
     color: white;
-    font-size: calc(11px + .2vw);
+    font-size: calc(13px + .3vw);
 }
 
 .send-message-area{

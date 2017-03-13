@@ -9,10 +9,9 @@ http.listen( port, function () {
 });
 
 
-app.use("/", function(req, res, next){
+app.get("/", function(req, res, next){
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log(ip);
-    
     next();
 });
 
@@ -25,9 +24,9 @@ app.use(express.static(__dirname + '/public'));
 // listen to 'chat' messages
 io.on('connection', function(socket){
     socket.on('chat', function(msg){
-	let date = Date();
+	let date = new Date();
 	io.emit('chat', { 'user' : 'Bob',
-			  'timestamp': date,
+			  'timestamp': date.getTime(),
 			  'contents' : msg });
     });
 });

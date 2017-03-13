@@ -1,4 +1,5 @@
 
+// document ready calls
 $(function(){
    var socket = io();
     
@@ -7,8 +8,9 @@ $(function(){
 	timestamp = msg.timestamp;
 	message = msg.contents;
 
-	let formatted_message = generate_message(user, timestamp, message);
+	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp);
 	$('#messages').prepend(formatted_message);
+	display_message(user, timestamp);
     });
     
     $('#input-msg').keypress(function(event){
@@ -32,8 +34,19 @@ $(function(){
     });
 });
 
-function generate_message(user, timestamp, msg){
-    let mesg = '<div class="message">' +
+
+/* functions */ 
+function display_message(user, timestamp){
+    let id = '#' + user + timestamp;
+    $(id).animate({
+	opacity: 1.0
+    }, 750, function(){ //animation finish
+    });
+}
+
+function generate_message(user, timestamp, msg, utc){
+    let mesg = '<div id=' + user + utc + 
+	' style="opacity:0.0;" class="message">' +
 	'<div class="message-header">' +
 	'<div class="message-user">' + user + '</div>' + 
 	'<div class="message-time">' + timestamp + '</div>' +
@@ -43,7 +56,5 @@ function generate_message(user, timestamp, msg){
 }
 
 function recv_message(msg, callback){
-
+    
 }
-
-
