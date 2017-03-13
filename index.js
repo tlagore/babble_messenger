@@ -8,11 +8,26 @@ http.listen( port, function () {
     console.log('listening on port', port);
 });
 
+
+app.use("/", function(req, res, next){
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(ip);
+    
+    next();
+});
+
 app.use(express.static(__dirname + '/public'));
+
+/*app.get("/", function(req, res){
+    console.log("in here.");
+});*/
 
 // listen to 'chat' messages
 io.on('connection', function(socket){
     socket.on('chat', function(msg){
-	io.emit('chat', msg + " u fuk");
+	let date = Date();
+	io.emit('chat', { 'user' : 'Bob',
+			  'timestamp': date,
+			  'contents' : msg });
     });
 });
