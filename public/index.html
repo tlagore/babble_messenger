@@ -5,23 +5,49 @@
   </head>
   <body>
     <div class="body-container">
+      <div class="header-container">
+	<div class="row15 margin-left5"><h4>Users</h4></div>
+	<div class="row85 center-horiz"><h4>Messages</h4></div>
+      </div>
+      
       <div class="content-container">
-	<div id="users">
-	  <div class="col5">Users</div>
-	  <div class="col95">Users Display</div>
+	<div class="users">
+	  <div class="col100 center-horiz">
+	    <h4>Bob</h4>
+	  </div>
 	</div>
 	
 	<div class="message-area">
-	  <div id="messages">
-	    <div style="height:5.88235%">Messages</div>
-	    <div class="col95">Message content</div>
+	  <div class="messages" id ="messages">
+	    <div class="message">
+	      <div class="message-header">
+		<div class="message-user">Bob</div>
+		<div class="message-time">January 20, 2017 10:38:45 PM</div>
+	      </div>
+	      <div class="message-content">
+		Message
+	      </div>
+	    </div>
 	  </div>
 	  <div class="send-message-area">
-	    <div id="message">SEND MESSAGE</div>
-	    <div id="submit-message">wut</div>
+	    <div class="message-input">
+	      <div class="row95" id="message-text">
+		<input id="input-msg" style="width: 95%; height: 95%;" type="text" placeholder="Message"></div>
+	      <div class="row5 right">
+		<span>
+		  <img id="submit-message" class="inverted clickable" src="static/glyphicons/glyphicons-11-envelope.png"></img>
+		</span>
+	      </div>
+	    </div>
 	  </div>
 	</div>
       </div>
     </div>
+    <script
+       src="https://code.jquery.com/jquery-3.1.1.min.js"
+       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+       crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
   </body>
 </html>
