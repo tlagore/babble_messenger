@@ -2,6 +2,8 @@
 // document ready calls
 $(function(){
     var socket = io();
+    localStorage.setItem("history", JSON.stringify({'chat_history': []}));
+    localStorage.setItem("history_count", "0");
     socket.emit('loaded');
 
     socket.on('chat', function(msg){
@@ -13,7 +15,10 @@ $(function(){
 	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp, color);
 
 	$('#messages').prepend(formatted_message);
+
 	display_message(user, timestamp);
+
+
     });
 
     socket.on('user_joined', function(msg){
@@ -38,14 +43,35 @@ $(function(){
 	$('#whoami').html('You are: <b style="color:' + color + '">' + name + '</b>');
     });
     
-    $('#input-msg').keypress(function(event){
-	//escape
-	if(event.which  === 0){
+    $('#input-msg').keydown(function(event){
+	//alert(localStorage.getItem("history"));
+	
+	let history = JSON.parse(localStorage.getItem("history"));
+	let count = parseInt(localStorage.getItem("history_count"));
+	if(event.keyCode  == 27){
+	    event.preventDefault();
 	    $('#input-msg').val('');
-	}else if(event.which == 13){
+	    
+	}else if(event.keyCode == 38){
+	    //up arrow
+	    if(count > 0){
+		$('#input-msg').val(history.chat_history[count - 1].toString());
+		count --;
+		if(count <= 0){
+		    count = history.chat_history.length;
+		}
+		localStorage.setItem("history_count", count.toString());
+	    }
+	    
+	}else if(event.keyCode == 13){
 	    let msg = $('#input-msg').val();
 	    
 	    if(msg != ''){
+		count++;
+		history.chat_history.push(msg);
+		localStorage.setItem("history", JSON.stringify(history));
+		localStorage.setItem("history_count", count.toString());
+		
 		socket.emit('chat', msg);
 	    }
 

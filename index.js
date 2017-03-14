@@ -83,12 +83,6 @@ io.on('connection', function(socket){
 	socket.emit('user_name', { 'user_name': users[user].user_name,
 				   'user_color': users[user].user_color });
 
-	message = {'user' : 'server',
-		   'timestamp':new Date().getTime(),
-		   'color': '#76d65e',
-		   'contents': users[user].user_name + " has joined the server."};
-
-	io.emit('chat', message);
 
 	for(let message of message_log){
 	    socket.emit('chat', message);
@@ -100,20 +94,25 @@ io.on('connection', function(socket){
 					    'user_color': users[key].user_color });
 	    }
 	}
+
+	message = {'user' : 'server',
+		   'timestamp':new Date().getTime(),
+		   'color': '#76d65e',
+		   'contents': users[user].user_name + " has joined the server."};
+
+	io.emit('chat', message);
     });
     
     socket.on('chat', function(msg){
 	let date = new Date();
 
 	// need to get user from here, message could be a command
-	let msg_contents = parse_message(msg);
+	let msg_contents = parse_message(msg, socket);
 
 	let user_name = msg_contents.user
 
 	console.log(user_name);
 	user_name = user_name == undefined ? users[user].user_name : user_name;
-
-	console.log(user_name);
 	
 	let contents = msg_contents.message;
 	let color = msg_contents.color;
@@ -142,7 +141,7 @@ io.on('connection', function(socket){
     }); 
 });
 
-function parse_message(msg){
+function parse_message(msg, socket){
     let user = undefined;
     let color = undefined;
     
@@ -161,13 +160,19 @@ function parse_message(msg){
     return {'message': message, 'user': user, 'color': color };
 }
 
-function parse_command(msgParts){
+function parse_command(msgParts, socket){
     msg = undefined;
+    let user_regex = new RegExp(/^[0-9a-z_]+$/i);
     
     if (msgParts[0] == "/nick"){
 	newNick = msgParts[1];
 	if (newNick != undefined && msgParts.length == 2){
-	    msg = msg[1];
+	    if(user_regex.test(newNick)){
+		console.log('here');
+		msg = 'yay'
+	    }else{
+		msg = 'nah dude.'
+	    }	
 	}else{
 	    timestamp = new Date().getTime();
 	    msg = "Invalid usage, correct usage is /nick [new_nickname]. Name must not contain spaces.";	    
