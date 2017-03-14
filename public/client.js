@@ -4,7 +4,6 @@ $(function(){
     var socket = io();
     socket.emit('loaded');
 
-    
     socket.on('chat', function(msg){
 	user = msg.user;
 	timestamp = msg.timestamp;
@@ -17,9 +16,12 @@ $(function(){
 	display_message(user, timestamp);
     });
 
-    socket.on('user_joined', function(name){
+    socket.on('user_joined', function(msg){
+	let name = msg.user_name;
+	let color = msg.user_color;
+	
 	if(!$('#'+name).length){
-	    $('#users').append('<h4 id=' + name + '>' + name + '</h4>');
+	    $('#users').append('<h4 style="color:' + color + ';" id=' + name + '>' + name + '</h4>');
 	}
     });
 
@@ -29,8 +31,11 @@ $(function(){
 	}
     });
 
-    socket.on('user_name', function(name){
-	$('#whoami').html("You are: <b>" + name + "</b>");
+    socket.on('user_name', function(user){
+	let name = user.user_name;
+	let color = user.user_color;
+	
+	$('#whoami').html('You are: <b style="color:' + color + '">' + name + '</b>');
     });
     
     $('#input-msg').keypress(function(event){
@@ -39,9 +44,8 @@ $(function(){
 	    $('#input-msg').val('');
 	}else if(event.which == 13){
 	    let msg = $('#input-msg').val();
-
-	    let message = parse_message(msg);
-	    if(message != undefined){
+	    
+	    if(msg != ''){
 		socket.emit('chat', msg);
 	    }
 
@@ -52,9 +56,8 @@ $(function(){
     $('#submit-message').click(function(){
 	let msg = $('#input-msg').val()
 
-	let message = parse_message(msg);
-	if (message != undefined){
-	    socket.emit(parse_message(message));
+	if (msg != ''){
+	    socket.emit('chat', msg);
 	}
 
 	$('#input-msg').val('');
@@ -62,48 +65,6 @@ $(function(){
 });
 
 
-function parse_message(msg){
-    message = undefined;
-
-    
-    if (msg[0] === '/'){
-	alert("why");
-	msgParts = msg.split(" ");
-	message = parse_command(msgParts);
-    }
-    else if (msg == ''){
-	message = undefined;
-    }else{
-	message = msg;
-    }
-    
-    return message;
-}
-
-function parse_command(msgParts){
-    msg = undefined;
-    
-    if (msgParts[0] === "/nick"){
-	newNick = msgParts[1];
-	if (newNick != undefined){
-	    //check for consistency
-	    alert("yo");
-	    msg = msg[1];
-	}else{
-	    timestamp = new Date().getTime();
-	    formatted_message = generate_message(
-		"server",
-		undefined,
-		"Invalid usage, correct usage is /nick [new_nickname]",
-		timestamp,
-		"#e24646");
-	    $('#messages').prepend(formatted_message);
-	    display_message("server", timestamp);
-	}
-    }
-
-    return msg;
-}
 
 /* functions */ 
 function display_message(user, timestamp){
