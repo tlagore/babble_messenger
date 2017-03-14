@@ -64,7 +64,10 @@ $(function(){
 
 function parse_message(msg){
     message = undefined;
-    if (msg[0] = '/'){
+
+    
+    if (msg[0] === '/'){
+	alert("why");
 	msgParts = msg.split(" ");
 	message = parse_command(msgParts);
     }
@@ -74,7 +77,7 @@ function parse_message(msg){
 	message = msg;
     }
     
-    return message;;
+    return message;
 }
 
 function parse_command(msgParts){
