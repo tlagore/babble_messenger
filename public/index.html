@@ -16,15 +16,17 @@
 
 	  </div>
 	</div>
-	
+
 	<div class="message-area">
-	  <div class="messages" id ="view-messages">
-	    <!-- Messages will be displayed here -->
+	  <div class="message-wrapper" id="message-wrapper">
+	    <div class="messages" id ="view-messages">
+	      <!-- Messages will be displayed here -->
+	    </div>
 	  </div>
 	  <div class="send-message-area">
 	    <div class="message-input">
 	      <div class="row95" id="message-text">
-		<input id="input-msg" style="width: 95%; height: 95%;" type="text" placeholder="Message"></div>
+		<input id="input-msg" class="input-msg" type="text" placeholder="Message"></div>
 	      <div class="row5 right">
 		<span>
 		  <img id="submit-message" class="inverted clickable" src="static/glyphicons/glyphicons-11-envelope.png"></img>
@@ -41,5 +43,6 @@
        crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/client.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script>
   </body>
 </html>

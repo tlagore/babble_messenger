@@ -1,22 +1,36 @@
 
 // document ready calls
+/* This disgusting hack of a function fixes the firefox bug without killing scrolling on 
+   chrome. Took like 3 hours to figure out.
+ */
+$(function(){
+    var isChrome = !!window.chrome && !!window.chrome.webstore;
+    if(isChrome){
+	$('#view-messages').css('overflow', 'auto');
+    }
+});
+
 $(function(){
     var socket = io();
     localStorage.setItem("history", JSON.stringify({'chat_history': []}));
     localStorage.setItem("history_count", "0");
     socket.emit('loaded');
 
+
+    /* Occurs when client receives a message from the server */
     socket.on('chat', function(msg){
 	user = msg.user;
 	timestamp = msg.timestamp;
 	message = msg.contents;
 	color = msg.color;
-	
-	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp, color);
 
+	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp, color);
 	$('#view-messages').prepend(formatted_message);
 
 	display_message(user, timestamp);
+
+	if(user == "server" || $('#me-'+user).html() == user)
+	    scrollToBottom();
     });
 
     socket.on('user_joined', function(msg){
@@ -39,6 +53,15 @@ $(function(){
 	let color = user.user_color;
 	
 	$('#whoami').html('You are: <b id="me-' + name + '" style="color:' + color + '">' + name + '</b>');
+    });
+
+    socket.on('color_changed', function(msg){
+	let name = msg.user_name;
+	let color = msg.user_color;
+
+	if($('#'+name).length){
+	    $('#'+name).css('color', color);
+	}
     });
 
     socket.on('name_changed', function(msg){
@@ -100,8 +123,20 @@ $(function(){
 		history.chat_history.push(msg);
 		localStorage.setItem("history", JSON.stringify(history));
 		localStorage.setItem("history_count", count.toString());
+
 		
-		socket.emit('chat', msg);
+		if(msg.startsWith("/nickcolor")){
+		    let goodColor =  verifyColor(msg);
+		    if (goodColor){
+			socket.emit('chat', msg);
+		    }else{
+			send_server_message("Bad color. Try another css color. (lower case)");
+		    }
+		}else{
+		    if(msg != ''){
+			socket.emit('chat', msg);
+		    }
+		}
 	    }
 
 	    $('#input-msg').val('');
@@ -111,14 +146,58 @@ $(function(){
     $('#submit-message').click(function(){
 	let msg = $('#input-msg').val()
 
-	if (msg != ''){
-	    socket.emit('chat', msg);
+	if(msg.startsWith("/nickcolor")){
+	    let goodColor =  verifyColor(msg);
+	    if (goodColor){
+		socket.emit('chat', msg);
+	    }else{
+		send_server_message("Bad color. Try another css color. (lower case)");
+	    }
+	}else{
+	    if (msg != ''){
+		socket.emit('chat', msg);
+		scrollToBottom();
+	    }
 	}
-
 	$('#input-msg').val('');
     });
 });
 
+function scrollToBottom(){
+    var messages = document.getElementById("message-wrapper");
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function verifyColor(command){
+    let rgb = new RegExp(/^\d{1,3}:\d{1,3}:\d{1,3}$/);
+    let msgParts = command.split(" ");
+    
+    if(msgParts.length != 2){
+	return false;
+    }
+    
+    if(rgb.test(msgParts[1])){
+	return true;
+    }else{
+	return checkColorString(msgParts[1]);
+    }
+}
+
+function send_server_message(msg){
+    let timestamp = new Date().getTime();
+    let formatted_message = server_message(timestamp, msg, "#e24646");
+    $('#view-messages').prepend(formatted_message);
+    display_message(user, timestamp);
+}
+    
+
+//function taken from stackoverflow answer
+//http://stackoverflow.com/questions/6386090/validating-css-color-names
+function checkColorString(stringToTest){
+    let rgb = $c.name2rgb(stringToTest).RGB;
+    let rgb_digits = rgb.split(", ")
+    return(!isNaN(rgb[0]));    
+}
 
 
 /* functions */ 
@@ -140,6 +219,7 @@ function generate_message(user, timestamp, msg, utc, color){
 	return server_message(utc, msg, color)
     }else{
 	let message = msg;
+
 	if($('#me-'+user).html() == user){
 	    message = '<i><font style="color:#b2f3f7">' + msg + '</font></i>';
 	}

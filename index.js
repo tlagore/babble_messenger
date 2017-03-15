@@ -177,10 +177,15 @@ function parse_message(msg, socket, user){
 function parse_command(msgParts, socket, user){
     msg = undefined;
     let user_regex = new RegExp(/^[0-9a-z_]+$/i);
-    
-    if (msgParts[0] == "/nick"){
+    let rgb = new RegExp(/^\d{1,3}:\d{1,3}:\d{1,3}$/);
+
+    if (msgParts.length > 2){
+	msg = "Commands don't take more than one argument.";
+    }else if (msgParts[0] == "/nick"){
 	newNick = msgParts[1];
-	if (newNick != undefined && msgParts.length == 2){
+	if (newNick == "server"){
+	    msg = "I'm the server, not you :)";
+	}else if (newNick != undefined && msgParts.length == 2){
 	    if(newNick.length <= 25 && user_regex.test(newNick)){
 		if(change_name(newNick, socket, user)){
 		    msg = 'Changed name to ' + newNick + '.';
@@ -195,17 +200,63 @@ function parse_command(msgParts, socket, user){
 	    timestamp = new Date().getTime();
 	    msg = "Invalid usage, correct usage is /nick [new_nickname]. Name must not contain spaces.";	    
 	}
+
+	//client side already verified nickcolor, but we don't trust the client side
+    }else if(msgParts[0] == "/nickcolor"){
+	if (rgb.test(msgParts[1])){
+	    let colors = msgParts[1].toString().split(":");
+	    let red = colors[0];
+	    let green = colors[1];
+	    let blue = colors[2];
+
+	    console.log(red + " " + green + " " + blue);
+
+	    if(between(red, 0, 255) && between(green, 0, 255) && between(blue, 0, 255)){
+		users[user].user_color = "rgb(" + red + ", " + green + ", " + blue + ")";
+		socket.emit("user_name", { 'user_name': users[user].user_name,
+					   'user_color': users[user].user_color });
+		io.emit('color_changed', { 'user_name': users[user].user_name,
+					   'user_color': users[user].user_color });
+		msg = "Changed color to " + msgParts[1];
+	    }else{
+		msg = "RGB values can only be between 0 and 255";
+	    }
+	}else{
+	    //bad part here, we let the client side validate that the user color was a valid
+	    //css string, however the worst thing that can happen (because we ensure the color
+	    //is an alpha-string) is that they get white for their user name. No script injection
+	    //here!
+	    if(!(new RegExp(/^[a-zA-Z]*$/)).test(msgParts[1])){
+		msg = "Bad color value.";
+	    }else{
+		users[user].user_color = msgParts[1];
+		socket.emit("user_name", { 'user_name': users[user].user_name,
+					   'user_color': users[user].user_color });
+		io.emit('color_changed', { 'user_name': users[user].user_name,
+					   'user_color': users[user].user_color });
+		msg = "Changed color to " + msgParts[1];
+	    }
+	    //bad part here, we trust the client to 
+	}
+
     }else if(msgParts[0] == "/help"){
 	msg = "/help -- shows this menu :)<br/>" +
 	    "/nick [nickname] -- sets your nickname to the new name<br/>" +
 	    "/nickcolor [rgb] -- sets your nickname color to the new color (format: 0-255:0-255:0-255)<br/>"+
-	    "/nickcolor [color] -- sets your nickname to the color (string format)<br/>" +
+	    "/nickcolor [color] -- sets your nickname to the css color (lower case)<br/>" +
 	    "up and down arrows cycle through your chat history of sent messages<br/>" +
 	    "escape clears your current message<br/>" +
 	    "enter is a quicker way to send your message than clicking the send button<br/>";
+    }else{
+	msg = "Invalid command.";
     }
     return msg;
 }
+
+function between(n, x, y){
+    return n >= x && n <= y;
+}
+
 
 function change_name(requestedName, socket, user){
     let good_change = true;
@@ -275,3 +326,4 @@ function generate_username(){
 
     return name;
 }
+
