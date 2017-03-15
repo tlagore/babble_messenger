@@ -155,6 +155,7 @@ io.on('connection', function(socket){
     }); 
 });
 
+/* check to see if a message is a command if so, handle command */
 function parse_message(msg, socket, user){
     let user_name = undefined;
     let color = undefined;
@@ -174,6 +175,7 @@ function parse_message(msg, socket, user){
     return {'message': message, 'user': user_name, 'color': color };
 }
 
+/* parse command for its contents and do error checking, then run command */
 function parse_command(msgParts, socket, user){
     msg = undefined;
     let user_regex = new RegExp(/^[0-9a-z_]+$/i);

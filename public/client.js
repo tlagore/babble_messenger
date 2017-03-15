@@ -163,11 +163,13 @@ $(function(){
     });
 });
 
+//scroll to bottom of messages
 function scrollToBottom(){
     var messages = document.getElementById("message-wrapper");
     messages.scrollTop = messages.scrollHeight;
 }
 
+//verify that a color is in format RRR:GGG:BBB or css color
 function verifyColor(command){
     let rgb = new RegExp(/^\d{1,3}:\d{1,3}:\d{1,3}$/);
     let msgParts = command.split(" ");
@@ -200,7 +202,7 @@ function checkColorString(stringToTest){
 }
 
 
-/* functions */ 
+/* animate the message appearing */ 
 function display_message(user, timestamp){
     let id = '#' + user + timestamp;
     $(id).animate({
