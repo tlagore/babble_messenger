@@ -14,7 +14,7 @@ $(function(){
 	
 	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp, color);
 
-	$('#messages').prepend(formatted_message);
+	$('#view-messages').prepend(formatted_message);
 
 	display_message(user, timestamp);
     });
@@ -24,7 +24,7 @@ $(function(){
 	let color = msg.user_color;
 	
 	if(!$('#'+name).length){
-	    $('#users').append('<h4 style="color:' + color + ';" id=' + name + '>' + name + '</h4>');
+	    $('#view-users').append('<h4 style="color:' + color + ';" id=' + name + '>' + name + '</h4>');
 	}
     });
 
@@ -54,7 +54,7 @@ $(function(){
 	    + '<i style="color:' + color + '">' + old_name + '</i> changed nickname to '
 	    + '<i style="color:' + color + '">' + new_name + '</i></div>';
 	
-	$('#messages').prepend(formatted_message);
+	$('#view-messages').prepend(formatted_message);
 	display_message("server", timestamp);
     });
 
@@ -65,7 +65,7 @@ $(function(){
 
 	if($('#'+name).length){
 	    $('#'+name).remove();
-	    $('#users').append('<h4 style="color:' + color + ';" id=' + new_name + '>' + new_name + '</h4>');
+	    $('#view-users').append('<h4 style="color:' + color + ';" id=' + new_name + '>' + new_name + '</h4>');
 	}
     });
     

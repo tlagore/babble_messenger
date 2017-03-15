@@ -102,6 +102,13 @@ io.on('connection', function(socket){
 		   'contents': users[user].user_name + " has joined the server."};
 
 	io.emit('chat', message);
+
+	message = {'user' : 'server',
+		   'timestamp':new Date().getTime(),
+		   'color': '#e24646',
+		   'contents': 'Type /help to see a list of commands'};
+	
+	socket.emit('chat', message);	    
     });
     
     socket.on('chat', function(msg){
@@ -191,7 +198,11 @@ function parse_command(msgParts, socket, user){
     }else if(msgParts[0] == "/help"){
 	msg = "/help -- shows this menu :)<br/>" +
 	    "/nick [nickname] -- sets your nickname to the new name<br/>" +
-	    "/nickcolor [rgb] -- sets your nickname color to the new color<br/>";
+	    "/nickcolor [rgb] -- sets your nickname color to the new color (format: 0-255:0-255:0-255)<br/>"+
+	    "/nickcolor [color] -- sets your nickname to the color (string format)<br/>" +
+	    "up and down arrows cycle through your chat history of sent messages<br/>" +
+	    "escape clears your current message<br/>" +
+	    "enter is a quicker way to send your message than clicking the send button<br/>";
     }
     return msg;
 }
