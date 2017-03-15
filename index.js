@@ -19,7 +19,7 @@ http.listen( port, function () {
 
 
 app.get("/", function(req, res, next){
-   // var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    // var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     var cookie = req.cookies.user_hash;
     console.log(cookie);
     
@@ -27,7 +27,6 @@ app.get("/", function(req, res, next){
 	let user_hash = Math.floor(Math.random() * 1000000);
 
 	name = generate_username();
-
 	users[user_hash] = { 'user_name': name, 'user_color': '#00ace6' };
 	console.log("new user: " + name);
 	//1 hour expiration on cookie
@@ -48,10 +47,12 @@ app.use(express.static(__dirname + '/public'));
 io.on('connection', function(socket){
     let user = socket.request.cookies.user_hash;
 
-    if(user != undefined){
+    if(users[user] != undefined){
 	console.log("Known user: " + user);
     }else{
 	console.log("New user");
+	name = generate_username();
+	users[user] = { 'user_name': name, 'user_color': '#00ace6' };
     }
 
     socket.on('disconnect', function(){
@@ -69,7 +70,7 @@ io.on('connection', function(socket){
     });
 
     socket.on('loaded', function(){
-	//console.log(socket.id);
+	console.log("loaded");
 	if(users[user] != undefined){
 	    console.log("Known user. " + users[user].user_name + " logged in.");
 	    users[user].connected = true;
@@ -91,7 +92,7 @@ io.on('connection', function(socket){
 	for(let key in users){
 	    if(users[key].connected){
 		io.emit('user_joined', {'user_name': users[key].user_name,
-					    'user_color': users[key].user_color });
+					'user_color': users[key].user_color });
 	    }
 	}
 
@@ -104,51 +105,57 @@ io.on('connection', function(socket){
     });
     
     socket.on('chat', function(msg){
-	let date = new Date();
 
-	// need to get user from here, message could be a command
-	let msg_contents = parse_message(msg, socket);
+	if(users[user] != undefined){
+	    let date = new Date();
 
-	let user_name = msg_contents.user
+	    // need to get user from here, message could be a command
 
-	console.log(user_name);
-	user_name = user_name == undefined ? users[user].user_name : user_name;
-	
-	let contents = msg_contents.message;
-	let color = msg_contents.color;
-	color = color == undefined ? users[user].user_color : color;
+	    let msg_contents = parse_message(msg, socket, user);
 
-	//did the parse of the message change the user who is sending it
-	//if not, keep it as the user who sent it - regular message
-	
-	let message = { 'user' : user_name,
-			'timestamp': date.getTime(),
-			'color': color,
-			'contents' : contents };
+	    let user_name = msg_contents.user
 
-	if (message_log.length >= 300){
-	    shift(message_log);
-	}
-	
-	message_log.push(message);
+	    console.log(user_name);
+	    user_name = user_name == undefined ? users[user].user_name : user_name;
+	    
+	    let contents = msg_contents.message;
+	    let color = msg_contents.color;
+	    color = color == undefined ? users[user].user_color : color;
 
-	//if server message, only send to person who sent message, not everyone
-	if(user == 'server'){
-	    socket.emit('chat', message);
-	}else{
-	    io.emit('chat', message);
+	    //did the parse of the message change the user who is sending it
+	    //if not, keep it as the user who sent it - regular message
+
+	    console.log('sending message from ' + user_name);
+	    
+	    let message = { 'user' : user_name,
+			    'timestamp': date.getTime(),
+			    'color': color,
+			    'contents' : contents };
+
+	    console.log('contents: ' + contents);
+	    //if server message, only send to person who sent message, not everyone
+	    if(user_name == 'server'){
+		socket.emit('chat', message);
+	    }else{
+		console.log("Shouldnt be server: " + user);
+		if (message_log.length >= 300){
+		    shift(message_log);
+		}
+		message_log.push(message);
+		io.emit('chat', message);
+	    }
 	}
     }); 
 });
 
-function parse_message(msg, socket){
-    let user = undefined;
+function parse_message(msg, socket, user){
+    let user_name = undefined;
     let color = undefined;
     
     if (msg[0] === '/'){
 	msgParts = msg.split(" ");
-	message = parse_command(msgParts);
-	user = "server";
+	message = parse_command(msgParts, socket, user);
+	user_name = "server";
 	color = "#e24646";
     }
     else if (msg == ''){
@@ -157,29 +164,62 @@ function parse_message(msg, socket){
 	message = msg;
     }
     
-    return {'message': message, 'user': user, 'color': color };
+    return {'message': message, 'user': user_name, 'color': color };
 }
 
-function parse_command(msgParts, socket){
+function parse_command(msgParts, socket, user){
     msg = undefined;
     let user_regex = new RegExp(/^[0-9a-z_]+$/i);
     
     if (msgParts[0] == "/nick"){
 	newNick = msgParts[1];
 	if (newNick != undefined && msgParts.length == 2){
-	    if(user_regex.test(newNick)){
-		console.log('here');
-		msg = 'yay'
-	    }else{
-		msg = 'nah dude.'
+	    if(newNick.length <= 25 && user_regex.test(newNick)){
+		if(change_name(newNick, socket, user)){
+		    msg = 'Changed name to ' + newNick + '.';
+		}else{
+		    msg = 'Name taken.';
+		}
+	    }
+	    else{
+		msg = 'Invalid nickname. Nicknames must be alphanumeric and may contain underscores and no more than 25 characters in length.';
 	    }	
 	}else{
 	    timestamp = new Date().getTime();
 	    msg = "Invalid usage, correct usage is /nick [new_nickname]. Name must not contain spaces.";	    
 	}
+    }else if(msgParts[0] == "/help"){
+	msg = "/help -- shows this menu :)<br/>" +
+	    "/nick [nickname] -- sets your nickname to the new name<br/>" +
+	    "/nickcolor [rgb] -- sets your nickname color to the new color<br/>";
+    }
+    return msg;
+}
+
+function change_name(requestedName, socket, user){
+    let good_change = true;
+    for (let key in users){
+	if(users[key].user_name == requestedName){
+	    good_change = false;
+	    break;
+	}
     }
 
-    return msg;
+    if(good_change){
+	io.emit('name_changed', { 'old_name': users[user].user_name,
+				  'new_name': requestedName,
+				  'user_color': users[user].user_color,
+				  'server_color': '#76d65e'});
+	io.emit('change_name', { 'old_name' : users[user].user_name,
+				 'new_name' : requestedName,
+				 'user_color' : users[user].user_color})
+	socket.emit('user_name', { 'user_name' : requestedName,
+				   'user_color' : users[user].user_color });
+
+	users[user].user_name = requestedName;		
+    }
+
+    return good_change;
 }
 
 
@@ -219,6 +259,8 @@ function generate_username(){
     if(i == 20){
 	name += Math.random().toString().substring(2, 5);
     }
+
+    taken_names[name] = true;
 
     return name;
 }

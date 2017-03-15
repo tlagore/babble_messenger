@@ -38,7 +38,35 @@ $(function(){
 	let name = user.user_name;
 	let color = user.user_color;
 	
-	$('#whoami').html('You are: <b style="color:' + color + '">' + name + '</b>');
+	$('#whoami').html('You are: <b id="me-' + name + '" style="color:' + color + '">' + name + '</b>');
+    });
+
+    socket.on('name_changed', function(msg){
+	let old_name = msg.old_name;
+	let new_name = msg.new_name;
+	let color = msg.user_color;
+	let server_color = msg.server_color;
+
+	let timestamp = new Date().getTime();
+
+	let formatted_message = '<div id=server' + timestamp + 
+	    ' style="opacity:0.1; color:' + server_color +'" class="message-content">'
+	    + '<i style="color:' + color + '">' + old_name + '</i> changed nickname to '
+	    + '<i style="color:' + color + '">' + new_name + '</i></div>';
+	
+	$('#messages').prepend(formatted_message);
+	display_message("server", timestamp);
+    });
+
+    socket.on('change_name', function(msg){
+	let name = msg.old_name;
+	let new_name = msg.new_name;
+	let color = msg.user_color;
+
+	if($('#'+name).length){
+	    $('#'+name).remove();
+	    $('#users').append('<h4 style="color:' + color + ';" id=' + new_name + '>' + new_name + '</h4>');
+	}
     });
     
     $('#input-msg').keydown(function(event){	
@@ -62,9 +90,6 @@ $(function(){
 	    if (count < history.chat_history.length - 1){
 		$('#input-msg').val(history.chat_history[count + 1].toString());
 		count ++;
-		/*if(count >= history.chat_history.length){
-		    count = 0;
-		}*/
 		localStorage.setItem("history_count", count.toString());
 	    }
 	}else if(event.keyCode == 13){
@@ -107,19 +132,23 @@ function display_message(user, timestamp){
 
 function server_message(utc, msg, color){
     return mesg = '<div id=server' + utc + 
-	' style="opacity:0.0;" class="message">' +
-	'<div class="message-content" style="color:' + color +'">' + msg + '</div></div>'
+	' style="opacity:0.1; color:' + color +'" class="message-content">' + msg + '</div>'
 }
 
 function generate_message(user, timestamp, msg, utc, color){
     if (user == "server"){
 	return server_message(utc, msg, color)
     }else{
+	let message = msg;
+	if($('#me-'+user).html() == user){
+	    message = '<i><font style="color:#b2f3f7">' + msg + '</font></i>';
+	}
+
 	return '<div id=' + user + utc + 
-	    ' style="opacity:0.0;" class="message">' +
+	    ' style="opacity:0.1;" class="message">' +
 	    '<div class="message-header">' +
 	    '<div class="message-user" style="color: ' + color + '">' + user + '</div>' + 
 	    '<div class="message-time">' + timestamp + '</div>' +
-	    '</div><div class="message-content">' + msg + '</div></div>'
+	    '</div><div class="message-content">'+ message + '</div></div>';
     }
 }
