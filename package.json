@@ -5,8 +5,11 @@
   "dependencies": {
     "cookie-parser": "^1.4.3",
     "express": "^4.14.1",
+    "recordrtc-nodejs": "^1.0.1",
     "socket.io": "^1.7.3",
-    "socket.io-cookie-parser": "^1.0.0"
+    "socket.io-client": "^1.7.3",
+    "socket.io-cookie-parser": "^1.0.0",
+    "socket.io-stream": "^0.9.1"
   },
   "scripts": {
     "start": "node index.js"

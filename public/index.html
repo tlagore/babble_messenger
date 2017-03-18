@@ -20,6 +20,7 @@
 	<div class="message-area">
 	  <div class="message-wrapper" id="message-wrapper">
 	    <div class="messages" id ="view-messages">
+	      <input type="file" id="selectedFile" />
 	      <!-- Messages will be displayed here -->
 	    </div>
 	  </div>
@@ -37,12 +38,14 @@
 	</div>
       </div>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/socket.io-stream.js"></script>
+    <!-- <script src="/static/js/require.js"></script> -->
     <script
        src="https://code.jquery.com/jquery-3.1.1.min.js"
        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
        crossorigin="anonymous"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/client.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script>
+    <script src="/static/js/client.js"></script>
   </body>
 </html>

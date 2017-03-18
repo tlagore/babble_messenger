@@ -10,14 +10,60 @@ $(function(){
     }
 });
 
+/*
+function readFile(file) {
+    alert(file.name);
+    var reader = new FileReader();
+    reader.onload = readSuccess;                                            
+    function readSuccess(evt) { 
+        var field = document.getElementById('view-messages');                        
+        field.innerHTML = evt.target.result;                                
+    };
+    reader.readAsText(file);                                              
+} 
+*/
+
+
+
 $(function(){
+    //var io = require('socket.io-client');
+    //var ss = require('socket.io-stream');
+
+
+    var socket = io.connect('/');
+
+    
+    $('#selectedFile').change(function(e){
+	var file = e.target.files[0];
+	var stream = ss.createStream();
+
+	ss(socket).emit('write-file', stream, { name: file.name });
+	ss.createBlobReadStream(file).pipe(stream);	
+    });
+    
+    
+    /*
+    document.getElementById('selectedFile').onchange = function(e) {
+	let file = document.getElementById('selectedFile').files[0];
+	var reader = new FileReader();
+	reader.onload = readSuccess;                                            
+	function readSuccess(evt) { 
+            var field = document.getElementById('view-messages');                        
+            field.innerHTML = evt.target.result;                                
+	};
+
+	ss(socket).emit('write-file', stream, { name: file.name });
+	ss.createBlobReadStream().pipe(stream);
+    };*/
+
+    /*
+
     var socket = io();
     localStorage.setItem("history", JSON.stringify({'chat_history': []}));
     localStorage.setItem("history_count", "0");
     socket.emit('loaded');
 
 
-    /* Occurs when client receives a message from the server */
     socket.on('chat', function(msg){
 	user = msg.user;
 	timestamp = msg.timestamp;
@@ -161,6 +207,7 @@ $(function(){
 	}
 	$('#input-msg').val('');
     });
+    */
 });
 
 //scroll to bottom of messages
@@ -169,21 +216,6 @@ function scrollToBottom(){
     messages.scrollTop = messages.scrollHeight;
 }
 
-//verify that a color is in format RRR:GGG:BBB or css color
-function verifyColor(command){
-    let rgb = new RegExp(/^\d{1,3}:\d{1,3}:\d{1,3}$/);
-    let msgParts = command.split(" ");
-    
-    if(msgParts.length != 2){
-	return false;
-    }
-    
-    if(rgb.test(msgParts[1])){
-	return true;
-    }else{
-	return checkColorString(msgParts[1]);
-    }
-}
 
 function send_server_message(msg){
     let timestamp = new Date().getTime();
