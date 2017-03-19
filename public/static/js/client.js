@@ -2,13 +2,66 @@
 // document ready calls
 /* This disgusting hack of a function fixes the firefox bug without killing scrolling on 
    chrome. Took like 3 hours to figure out.
- */
+*/
 $(function(){
-    var isChrome = !!window.chrome && !!window.chrome.webstore;
+    /*var isChrome = !!window.chrome && !!window.chrome.webstore;
     if(isChrome){
 	$('#view-messages').css('overflow', 'auto');
     }
+    */
+
 });
+
+
+//Make sure we're using the correct getUserMedia for our browser
+//navigator.getUserMedia = navigator.getUserMedia ||
+//    navigator.webkitGetUserMedia
+
+
+//load media device- audio. Asks user for permission to use microphone
+$(function(){
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(
+	function(stream){
+	    alert('got yo stream bitch.');
+	}
+    ).catch(
+	//didn't get stream, show error message
+	function(err){
+	    showMessage("If you do not allow microphone access, you cannot use the " +
+			"voice functionality of this site. " +
+		       "You can enable microphone in settings.");
+	}
+    );
+});
+
+
+//user clicked the x on the message
+$(function(){
+    $('#tag-remove-message').click(function(){
+	$('#user-message').hide();
+    });
+});
+
+
+function showMessage(msg){
+    var user_message = $('#user-message');
+    var user_message_content = $('#user-message-content');
+    user_message_content.html(msg);
+    user_message.animate(
+	{
+	    height: '5%'
+	},
+	{
+	    duration: 1000,
+	    queue: false
+	})
+	.delay(5000)
+	.animate({ height: '0px' }, 1000,
+		 function(){
+		     $(this).hide();
+		 });
+}
+
 
 /*
 function readFile(file) {

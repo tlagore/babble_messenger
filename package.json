@@ -5,6 +5,7 @@
   "dependencies": {
     "cookie-parser": "^1.4.3",
     "express": "^4.14.1",
+    "recorderjs": "^1.0.1",
     "recordrtc-nodejs": "^1.0.1",
     "socket.io": "^1.7.3",
     "socket.io-client": "^1.7.3",
@@ -13,5 +14,18 @@
   },
   "scripts": {
     "start": "node index.js"
-  }
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlagore/babble_messenger.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tlagore/babble_messenger/issues"
+  },
+  "homepage": "https://github.com/tlagore/babble_messenger#readme"
 }
