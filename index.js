@@ -1,4 +1,9 @@
 var express = require('express');
+
+//this is our config file - includes database info to connect. See definition
+//for values.
+var config = require('./config');
+var mysql = require('mysql');
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var app = express();
@@ -13,6 +18,17 @@ io.use(socketIoCookieParser());
 var users = {};
 var taken_names = {};
 var message_log = [];
+var database = mysql.createConnection(config.database);
+database.connect();
+
+
+//Test query - connects to mysql :>
+database.query('SHOW TABLES;', function(error, results){
+    if (error)
+	console.log("error :(   -   ", error.stack);
+    else
+	console.log('the solution is: ', results[0].Tables_in_babble);
+});
 
 http.listen( port, function () {
     console.log('listening on port', port);

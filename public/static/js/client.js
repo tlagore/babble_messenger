@@ -13,6 +13,8 @@ $(function(){
 });
 
 
+var recorder = null;
+
 //Make sure we're using the correct getUserMedia for our browser
 //navigator.getUserMedia = navigator.getUserMedia ||
 //    navigator.webkitGetUserMedia
@@ -20,8 +22,9 @@ $(function(){
 
 //load media device- audio. Asks user for permission to use microphone
 $(function(){
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(
+/*    navigator.mediaDevices.getUserMedia({ audio: true }).then(
 	function(stream){
+	    //recorder = new Recorder();
 	    alert('got yo stream bitch.');
 	}
     ).catch(
@@ -31,7 +34,7 @@ $(function(){
 			"voice functionality of this site. " +
 		       "You can enable microphone in settings.");
 	}
-    );
+    );*/
 });
 
 

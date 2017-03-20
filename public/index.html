@@ -4,11 +4,30 @@
     <link rel="stylesheet" href="static/style.css">
   </head>
   <body>
+    <div class="login-wrapper">
+      <div class="login-dialog">
+	<div class="register-panel">
+	  <div>Register</div>
+	  <input class="input-default" type="text" placeholder="User Name">
+	  <input class="input-default" type="text" placeholder="Email">
+	  <input class="input-default" type="password" placeholder="Password">
+	  <input class="input-default" type="password" placeholder="Repeat Password">
+	  
+	</div>
+	<div class="login-panel">
+	  <div>Login</div>
+	  <input class="input-default" type="text" placeholder="User Name">
+	  <input class="input-default" type="text" placeholder="Password">
+	</div>
+      </div>
+    </div>
+    
     <div class="user-message" id="user-message"><span id="user-message-content"></span><div id="tag-remove-message">x</div></div>
     <div class="body-container">
       <div class="header-container">
-	<div class="row15"><h4 id="whoami"></h4></div>
-	<div class="row85 center-horiz"><h4>Messages</h4></div>
+	<div>Babble Messenger</div>
+	<!-- <div class="row15"><h4 id="whoami"></h4></div>
+	<div class="row85 center-horiz"><h4>Messages</h4></div> -->
       </div>
 
       
@@ -42,6 +61,7 @@
     </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/socket.io-stream.js"></script>
+    <!-- <script src="/static/js/recorder.js"></script> -->
     <!-- <script src="/static/js/require.js"></script> -->
     <script
        src="https://code.jquery.com/jquery-3.1.1.min.js"
