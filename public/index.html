@@ -8,16 +8,21 @@
       <div class="login-dialog">
 	<div class="register-panel">
 	  <div>Register</div>
-	  <input class="input-default" type="text" placeholder="User Name">
-	  <input class="input-default" type="text" placeholder="Email">
-	  <input class="input-default" type="password" placeholder="Password">
-	  <input class="input-default" type="password" placeholder="Repeat Password">
-	  
+	  <input id="register_user" class="input-default" type="text" placeholder="User Name">
+	  <input id="register_email" class="input-default" type="text" placeholder="Email">
+	  <input id="register_password" class="input-default" type="password" placeholder="Password">
+	  <input id="register_confirm_password" class="input-default" type="password" placeholder="Repeat Password">
+	  <div class="bottom-flex">
+	    <input id="register_submit" type="submit" value="register">
+	  </div>
 	</div>
 	<div class="login-panel">
 	  <div>Login</div>
-	  <input class="input-default" type="text" placeholder="User Name">
-	  <input class="input-default" type="text" placeholder="Password">
+	  <input id="login_user" class="input-default" type="text" placeholder="User Name">
+	  <input id="login_password" class="input-default" type="password" placeholder="Password">
+	  <div class="bottom-flex">
+	    <input id="login_submit" type="submit" value="login">
+	  </div>
 	</div>
       </div>
     </div>
@@ -67,7 +72,7 @@
        src="https://code.jquery.com/jquery-3.1.1.min.js"
        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
        crossorigin="anonymous"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script> 
     <script src="/static/js/client.js"></script>
   </body>
 </html>

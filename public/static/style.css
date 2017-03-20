@@ -93,11 +93,26 @@ h1, h2, h3, h4, h5{
     text-align: center;
 }
 
+
+.bottom-flex{
+    display: flex;
+    flex-direction: column-reverse;
+    flex-grow: 1;
+    min-height: 25%;
+    margin-bottom: 20%;
+}
+
+input[type="submit"]{
+    font-size: calc(12px + .3vw);
+}
+
+
 .input-default{
     position: relative;
     width: 90%;
     height: 7%;
-    margin-top: 5%;
+    margin-top: 2%;
+    margin-bottom: 2%;
 }
 
 .body-container{
@@ -230,10 +245,6 @@ h1, h2, h3, h4, h5{
     width: 100%;
     height: 10%;
     padding-bottom: 1%;
-}
-
-*:focus {
-    outline: none;
 }
 
 .users{

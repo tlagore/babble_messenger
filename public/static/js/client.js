@@ -12,7 +12,6 @@ $(function(){
 
 });
 
-
 var recorder = null;
 
 //Make sure we're using the correct getUserMedia for our browser
@@ -79,6 +78,40 @@ function readFile(file) {
 } 
 */
 
+$(function(){
+    $('#login_submit').click(function(){
+	$.ajax({
+	    url: 'http://localhost:3000/login',
+	    data: { "user": $('#login_user').val(),
+		    "password": $('#login_password').val()},
+	    type: 'POST',
+	    success: function(data){
+		alert(data.success);
+	    },
+	    error: function(xhr, status, error){
+		alert('error');
+	    },
+	});
+    });
+
+    /* handle register sub*/
+    $('#register_submit').click(function(){
+
+	//do form validation first
+	$.ajax({
+	    url: 'http://localhost:3000/register',
+	    data: { "user": $('#login_user').val(),
+		    "password": $('#login_password').val()},
+	    type: 'POST',
+	    success: function(data){
+		alert(data.success);
+	    },
+	    error: function(xhr, status, error){
+		alert('error');
+	    },
+	});
+    });
+});
 
 
 $(function(){

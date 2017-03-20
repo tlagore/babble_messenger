@@ -1,11 +1,12 @@
 var express = require('express');
-
+const crypto = require('crypto');
 //this is our config file - includes database info to connect. See definition
 //for values.
 var config = require('./config');
 var mysql = require('mysql');
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
+var bodyParser = require("body-parser");
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
@@ -13,6 +14,7 @@ var port = process.env.PORT || 3000;
 var fs = require('fs');
 
 app.use(cookie_parser());
+app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
 
 var users = {};
@@ -40,6 +42,18 @@ var path = require('path');
 app.get("/", function(req, res, next){
     //do stuff on home get request
     next();
+});
+
+//stub for login - check that password == user password in DB.
+app.post("/login", function(req, res){
+    console.log(req.body);
+    res.send({'success': true});
+});
+
+//stub for register - try to register user and log in DB.
+app.post("/register", function(req, res){
+    console.log(req.body);
+    res.send({'success': true});
 });
 
 app.use(express.static(__dirname + '/public'));
