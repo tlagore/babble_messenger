@@ -104,8 +104,18 @@ h1, h2, h3, h4, h5{
 
 input[type="submit"]{
     font-size: calc(12px + .3vw);
+    /* background-color: #00ace6;*/
+    background-color: #007399;
+    color: white;
+    border-style: none;
+    width: calc(100px + 5vw);
+    height: calc(30px + 1vh);
+    cursor: pointer;
 }
 
+input[type="submit"]:hover{
+    background-color: #004799;
+}
 
 .input-default{
     position: relative;
@@ -280,7 +290,9 @@ input[type="text"], input[type="password"], textarea {
 
 input[type="text"]:focus, input[type="password"]:focus{
     border-width: 1px;
-    border-style: solid;
+    border: 1px solid #007399;;
+    color: white;
+    box-shadow: 0 0 5px;
 }
 
 

@@ -79,6 +79,26 @@ function readFile(file) {
 */
 
 $(function(){
+    var valid_char_check = function(event){
+	if(event.which == 127 || event.which == 8 || event.which == 0)
+	    return;
+	
+	if((event.which < 48 || event.which > 57) &&
+	   (event.which < 65 || event.which > 122)){
+	    event.preventDefault();
+	}
+    };
+    
+    $('#login_user').keypress(function(event){
+	valid_char_check(event);
+    });
+
+    $('#register_user').keypress(function(event){
+	valid_char_check(event);
+    });
+
+    
+    
     $('#login_submit').click(function(){
 	$.ajax({
 	    url: 'http://localhost:3000/login',
