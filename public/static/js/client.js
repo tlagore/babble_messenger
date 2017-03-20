@@ -21,7 +21,7 @@ var recorder = null;
 
 //load media device- audio. Asks user for permission to use microphone
 $(function(){
-/*    navigator.mediaDevices.getUserMedia({ audio: true }).then(
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(
 	function(stream){
 	    //recorder = new Recorder();
 	    alert('got yo stream bitch.');
@@ -33,7 +33,7 @@ $(function(){
 			"voice functionality of this site. " +
 		       "You can enable microphone in settings.");
 	}
-    );*/
+    );
 });
 
 
