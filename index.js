@@ -55,7 +55,6 @@ app.post("/login", function(req, res){
 
     console.log(psw);
     
-    let success = false;
     let query = queries.get_user_hash(connection.escape(user));
 
     console.log(query);
@@ -64,36 +63,26 @@ app.post("/login", function(req, res){
 	if (error){
 	    console.log(error);
 	}else{
-	    let salt = parseInt(result[0].salt);
-	    console.log(toType(salt));
-	    console.log('salt: ' + salt);
-	    console.log(result[0].password.toString('utf8'));
-	    let str = result[0].password.toString('utf8');
-	    console.log(str);
+	    let salt = parseInt(result[0].password.join());
 	    
 	    argon2.hash(req.body.password, salt, {
 		type: argon2.argon2d
 	    }).then(hash => {
+		var success = false;
+		
 		argon2.verify(hash, psw).then(match => {
-		    if(match)
-			console.log("yay!");
-		    else
+		    if(match){
+			console.log("Good password!");
+			success = true;
+		    }else{
 			console.log(":(");
+		    }
+		    res.send({'success': success});
 		});
 
-		console.log("hash length: " + hash.length);
-		console.log("db hash: " + result[0].password);
-		console.log("new hash: " + hash);
-		console.log(result[0].password);
-		
-		if (result[0].password == hash){
-		    success = true;
-		}
 	    });
 	}	   
     });
-    console.log(req.body);
-    res.send({'success': success});
 });
 
 
