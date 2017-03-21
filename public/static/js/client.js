@@ -96,8 +96,6 @@ $(function(){
     $('#register_user').keypress(function(event){
 	valid_char_check(event);
     });
-
-    
     
     $('#login_submit').click(function(){
 	$.ajax({
@@ -120,8 +118,8 @@ $(function(){
 	//do form validation first
 	$.ajax({
 	    url: 'http://localhost:3000/register',
-	    data: { "user": $('#login_user').val(),
-		    "password": $('#login_password').val()},
+	    data: { "user": $('#register_user').val(),
+		    "password": $('#register_password').val()},
 	    type: 'POST',
 	    success: function(data){
 		alert(data.success);

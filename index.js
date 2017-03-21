@@ -1,9 +1,12 @@
 var express = require('express');
-const crypto = require('crypto');
+const argon2 = require('argon2');
 //this is our config file - includes database info to connect. See definition
 //for values.
 var config = require('./config');
+var queries = require('./queries');
+
 var mysql = require('mysql');
+
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var bodyParser = require("body-parser");
@@ -20,17 +23,18 @@ io.use(socketIoCookieParser());
 var users = {};
 var taken_names = {};
 var message_log = [];
-var database = mysql.createConnection(config.database);
-database.connect();
 
+var connection = mysql.createConnection(config.database);
+connection.connect();
 
 //Test query - connects to mysql :>
-database.query('SHOW TABLES;', function(error, results){
+connection.query('SHOW TABLES;', function(error, results){
     if (error)
 	console.log("error :(   -   ", error.stack);
     else
 	console.log('the solution is: ', results[0].Tables_in_babble);
 });
+
 
 http.listen( port, function () {
     console.log('listening on port', port);
@@ -46,14 +50,102 @@ app.get("/", function(req, res, next){
 
 //stub for login - check that password == user password in DB.
 app.post("/login", function(req, res){
+    let user = req.body.user;
+    let psw = req.body.password;
+
+    console.log(psw);
+    
+    let success = false;
+    let query = queries.get_user_hash(connection.escape(user));
+
+    console.log(query);
+    
+    connection.query(query, function(error, result){
+	if (error){
+	    console.log(error);
+	}else{
+	    let salt = parseInt(result[0].salt);
+	    console.log(toType(salt));
+	    console.log('salt: ' + salt);
+	    console.log(result[0].password.toString('utf8'));
+	    let str = result[0].password.toString('utf8');
+	    console.log(str);
+	    
+	    argon2.hash(req.body.password, salt, {
+		type: argon2.argon2d
+	    }).then(hash => {
+		argon2.verify(hash, psw).then(match => {
+		    if(match)
+			console.log("yay!");
+		    else
+			console.log(":(");
+		});
+
+		console.log("hash length: " + hash.length);
+		console.log("db hash: " + result[0].password);
+		console.log("new hash: " + hash);
+		console.log(result[0].password);
+		
+		if (result[0].password == hash){
+		    success = true;
+		}
+	    });
+	}	   
+    });
     console.log(req.body);
-    res.send({'success': true});
+    res.send({'success': success});
 });
+
+
 
 //stub for register - try to register user and log in DB.
 app.post("/register", function(req, res){
-    console.log(req.body);
-    res.send({'success': true});
+    let added = false;
+    let msg = '';
+    
+    if(req.body.password && req.body.password.length > 6){
+	//generate salt generates a 16 byte salt
+	argon2.generateSalt().then(salt => {
+	    console.log("salt: " + salt);
+	    
+	    argon2.hash(req.body.password, salt, {
+		type: argon2.argon2d
+	    }).then(hash => {
+		console.log("HASH SHOULD BE THIS: " + hash);
+	    }).catch(err => {
+		console.log(err);
+	    });;
+
+	    console.log(toType(salt));
+	    
+	    argon2.hash(req.body.password, salt, {
+		type: argon2.argon2d
+	    }).then(hash => {
+		let query = queries.insert_user(connection.escape(req.body.user),
+						salt,
+						hash);
+		
+		console.log("raw password: " + req.body.password);
+		console.log("salt: " + parseInt(salt.join()) + " hash: " + hash);
+		connection.query(query, function(error, results){
+		    if(error){
+			console.log(error);
+			console.log("error");
+		    }else{
+			console.log("no error");
+			console.log(results);
+		    }
+		});
+		
+		added = true;
+	    }).catch(err => {
+		console.log("failure..." + err);
+		//failure
+		
+	    })});
+    }
+
+    res.send({'success': true, 'message': msg });
 });
 
 app.use(express.static(__dirname + '/public'));
@@ -66,6 +158,22 @@ io.of('/').on('connection', function(socket){
 	stream.pipe(fs.createWriteStream(filename));
     })
 });
+
+var toType = function(obj) {
+  return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+}
+
+function logResponse(connection, query){
+
+    connection.query(query, function(error, results){
+	if(error){
+	    console.log("error: ");
+	    console.log(error);
+	}else{
+	    console.log(results);
+	}
+    });
+}
 
 // listen to 'chat' messages
 /*io.on('connection', function(socket){

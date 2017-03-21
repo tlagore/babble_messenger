@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "my first socket.io app",
   "dependencies": {
+    "argon2": "^0.15.0",
     "body-parser": "^1.17.1",
     "cookie-parser": "^1.4.3",
     "express": "^4.14.1",
