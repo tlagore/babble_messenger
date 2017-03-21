@@ -3,7 +3,6 @@ const argon2 = require('argon2');
 //this is our config file - includes database info to connect. See definition
 //for values.
 var config = require('./config');
-var queries = require('./queries');
 
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('babble.db');
@@ -32,6 +31,12 @@ function testInsert(){
 
     //select all rows
     db.each("SELECT * FROM user;",
+	    function(err, row){
+		console.log(row);
+	    });
+
+    //selet first row
+    db.get("SELECT * FROM user;",
 	    function(err, row){
 		console.log(row);
 	    });
@@ -66,8 +71,7 @@ app.get("/", function(req, res, next){
 });
 
 //stub for login - check that password == user password in DB.
-app.post("/login", function(req, res){
-    
+app.post("/login", function(req, res){    
     let query = "SELECT password FROM user WHERE user = ?";
     db.get(query, req.body.user, function(error, row){
 	if(error){
