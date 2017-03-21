@@ -6,7 +6,7 @@ var config = require('./config');
 var queries = require('./queries');
 
 var mysql = require('mysql');
-
+var sessions = require('client-sessions');
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var bodyParser = require("body-parser");
@@ -20,13 +20,11 @@ app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
 
-var users = {};
-var taken_names = {};
-var message_log = [];
-
 var connection = mysql.createConnection(config.database);
 connection.connect();
 
+//////////////////////////////////////////////////////////
+// remove this when done with it
 //Test query - connects to mysql :>
 connection.query('SHOW TABLES;', function(error, results){
     if (error)
@@ -34,7 +32,7 @@ connection.query('SHOW TABLES;', function(error, results){
     else
 	console.log('the solution is: ', results[0].Tables_in_babble);
 });
-
+/////////////////////////////////////////////////////////
 
 http.listen( port, function () {
     console.log('listening on port', port);
@@ -43,7 +41,22 @@ http.listen( port, function () {
 var ss = require('socket.io-stream');
 var path = require('path');
 
+app.use(sessions({
+    cookieName: 'session',
+    secret: genNonce(32),
+    duration: 30 * 60 * 1000, //session expires in 30 minutes
+    activeDuration: 1000 * 60 * 5 //if session has not expired and user shows activity, extend session for 5 minutes.
+}));
+
 app.get("/", function(req, res, next){
+    if(req.session.observed){
+	//user has been observed - dont make them log in (unless they haven't
+	//if the session has been seen, check if they are logged in.
+	console.log("I think I've seen you before...");
+    }else{
+	req.session.observed = true;
+	console.log("You're new! Gotta log in...");
+    }
     //do stuff on home get request
     next();
 });
@@ -84,8 +97,6 @@ app.post("/login", function(req, res){
 	}	   
     });
 });
-
-
 
 //stub for register - try to register user and log in DB.
 app.post("/register", function(req, res){
@@ -153,7 +164,6 @@ var toType = function(obj) {
 }
 
 function logResponse(connection, query){
-
     connection.query(query, function(error, results){
 	if(error){
 	    console.log("error: ");
@@ -164,6 +174,18 @@ function logResponse(connection, query){
     });
 }
 
+function genNonce(size){
+    var text = "";
+    let validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    for(var i = 0; i <= size; i++){
+	text += validChars.charAt(Math.floor(Math.random() * validChars.length));
+    }
+
+    return text;
+}
+       
+	
 // listen to 'chat' messages
 /*io.on('connection', function(socket){
     let user = socket.request.cookies.user_hash;
