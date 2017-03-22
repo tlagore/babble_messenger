@@ -7,6 +7,17 @@ body{
     overflow: hidden;
 }
 
+@keyframes slide-from-top{
+    from{
+	top: -100%;
+    }
+
+    to{
+	top: 12.5%;
+    }
+
+}
+
 .login-wrapper{
     position: absolute;;
     z-index: 3;
@@ -15,6 +26,9 @@ body{
 
     top: 12.5%;
     left: 12.5%;
+
+    animation-duration: 0.5s;
+    animation-name: slide-from-top;
 }
 
 .info-message{
@@ -297,9 +311,11 @@ input[type="submit"]:hover{
     background-repeat: no-repeat;
     background-position: right;
     background-color: #404040;
-    color: #bfbfbf;
+    border: 0px solid red;
+
+    /*color: #bfbfbf;
     border-style: none;
-    border-width: 1px;
+    border-width: 1px;*/
 }
 
 input[type="text"], input[type="password"], textarea {

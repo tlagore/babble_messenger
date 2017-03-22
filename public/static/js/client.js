@@ -93,7 +93,10 @@ $(function(){
 	var timeOut = setTimeout(checkUser, 500);
 	$('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-541-hourglass.png)');
     });
-			  
+
+    $('#register_user').focus(function(){
+	$('#register_user').css('border-width', '0px');
+    });
     
     $('#login_user').keypress(function(event){
 	valid_char_check(event);
@@ -131,7 +134,7 @@ $(function(){
     /* handle register sub*/
     $('#register_submit').click(function(){
 	if($('#register_user').val() == ''){
-	    $('#register_user').css('border', '1px solid red');
+	    $('#register_user').css('border-width', '1');
 	}else if ($('#register_password').val() != $('#register_confirm_password').val()){
 	    showAuthenticationMessage($('#register_message'), "Passwords do not match");
 	}else{    
