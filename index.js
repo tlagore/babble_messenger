@@ -70,6 +70,21 @@ app.get("/", function(req, res, next){
     next();
 });
 
+app.post("/check_user", function(req, res){
+    let query = "SELECT user FROM user WHERE user = ?";
+    db.get(query, req.body.user, function(error, row){
+	if(error){
+	    console.log(error);
+	}else{
+	    if(row == undefined)
+		res.send({ "available": true});
+	    else
+		res.send({"avaialbel": false});
+	    console.log(row);
+	}
+    });
+});
+
 //stub for login - check that password == user password in DB.
 app.post("/login", function(req, res){    
     let query = "SELECT password FROM user WHERE user = ?";

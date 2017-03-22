@@ -4,14 +4,15 @@
     <link rel="stylesheet" href="static/style.css">
   </head>
   <body>
-    <div class="login-wrapper">
+    <div class="login-wrapper" id="login-wrapper">
       <div class="login-dialog">
 	<div class="register-panel">
 	  <h2>Register</h2>
 	  <input onPaste="return false" id="register_user" class="input-default" type="text" placeholder="User Name">
-	  <input id="register_email" class="input-default" type="text" placeholder="Email">
+	  <input id="register_email" class="input-default" type="text" placeholder="Email (optional)">
 	  <input id="register_password" class="input-default" type="password" placeholder="Password">
 	  <input id="register_confirm_password" class="input-default" type="password" placeholder="Repeat Password">
+	  <div id="register_message" class="info-message"></div>
 	  <div class="bottom-flex">
 	    <input id="register_submit" type="submit" value="register">
 	  </div>
@@ -20,6 +21,7 @@
 	  <h2>Login</h2>
 	  <input onPaste="return false" id="login_user" class="input-default" type="text" placeholder="User Name">
 	  <input id="login_password" class="input-default" type="password" placeholder="Password">
+	  <div id="login_message" class="info-message"></div>
 	  <div class="bottom-flex">
 	    <input id="login_submit" type="submit" value="login">
 	  </div>

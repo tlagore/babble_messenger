@@ -15,8 +15,8 @@ $(function(){
 var recorder = null;
 
 //Make sure we're using the correct getUserMedia for our browser
-//navigator.getUserMedia = navigator.getUserMedia ||
-//    navigator.webkitGetUserMedia
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia
 
 
 //load media device- audio. Asks user for permission to use microphone
@@ -24,7 +24,7 @@ $(function(){
     navigator.mediaDevices.getUserMedia({ audio: true }).then(
 	function(stream){
 	    //recorder = new Recorder();
-	    alert('got yo stream bitch.');
+	    
 	}
     ).catch(
 	//didn't get stream, show error message
@@ -88,6 +88,12 @@ $(function(){
 	    event.preventDefault();
 	}
     };
+
+    $('#register_user').on("input", function(){
+	var timeOut = setTimeout(checkUser, 500);
+	$('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-541-hourglass.png)');
+    });
+			  
     
     $('#login_user').keypress(function(event){
 	valid_char_check(event);
@@ -99,12 +105,22 @@ $(function(){
     
     $('#login_submit').click(function(){
 	$.ajax({
-	    url: 'http://localhost:3000/login',
+	    url: '/login',
 	    data: { "user": $('#login_user').val(),
 		    "password": $('#login_password').val()},
 	    type: 'POST',
 	    success: function(data){
-		alert(data.success);
+		if(data.success){		  
+		    $('#login-wrapper').animate({
+			left: "5%"
+		    }, 250, function(){
+			$('#login-wrapper').animate({
+			    left: "110%"
+			}, 1000);
+		    });
+		}else{
+		    showAuthenticationMessage($('#login_message'), "Invalid user name or password.");
+		}
 	    },
 	    error: function(xhr, status, error){
 		alert('error');
@@ -114,23 +130,68 @@ $(function(){
 
     /* handle register sub*/
     $('#register_submit').click(function(){
-
-	//do form validation first
-	$.ajax({
-	    url: 'http://localhost:3000/register',
-	    data: { "user": $('#register_user').val(),
-		    "password": $('#register_password').val()},
-	    type: 'POST',
-	    success: function(data){
-		alert(data.success);
-	    },
-	    error: function(xhr, status, error){
-		alert('error');
-	    },
-	});
+	if($('#register_user').val() == ''){
+	    $('#register_user').css('border', '1px solid red');
+	}else if ($('#register_password').val() != $('#register_confirm_password').val()){
+	    showAuthenticationMessage($('#register_message'), "Passwords do not match");
+	}else{    
+	    //do form validation first
+	    $.ajax({
+		url: '/register',
+		data: { "user": $('#register_user').val(),
+			"password": $('#register_password').val()},
+		type: 'POST',
+		success: function(data){
+		    showAuthenticationMessage($('#register_message'),
+					      "Successfully registered as " + $('#register_user').val() + ". Please log in");
+		    clearRegisterFields();
+		},
+		error: function(xhr, status, error){
+		    alert('error');
+		},
+	    });
+	}
     });
 });
 
+function showAuthenticationMessage(element, message){
+    element.html(message);
+    element.animate({ width: "90%" }, 100, function(){
+	element.animate({ opacity: ".5" }, 300, function(){
+	    element.animate({ opacity: "1.0" }, 300, function(){
+	    })		   
+	})
+    });
+/*	.delay(100);
+
+    element.css('background-color', 'feab19');
+/*	element.animate({ backgroundColor: "#fe7419" }, 100, function(){
+	    element.animate({ backgroundColor: "#FEAB19" }, 100, function(){});
+	});
+    });*/
+}
+
+function checkUser(user){
+    if($('#register_user').val() != ''){
+	$.ajax({
+	    url: '/check_user',
+	    data: { "user" : $('#register_user').val() },
+	    type: "POST",
+	    success: function(data){
+		if(data.available){
+		    $('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-153-check.png)');
+		}else{
+		    $('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-79-warning-sign.png)');
+		}
+	    },
+	    error: function(xhr, status, error){
+		//do nothing
+	    }
+	});
+    }else{
+	$('#register_user').css('background-image', '');
+    }
+}
 
 $(function(){
     //var io = require('socket.io-client');
@@ -197,7 +258,7 @@ $(function(){
 
     socket.on('user_left', function(name){
 	if($('#'+name).length){
-	    $('#'+name).remove();
+
 	}
     });
 
@@ -316,6 +377,19 @@ $(function(){
     });
     */
 });
+
+function clearRegisterFields(){
+    $('#register_user').val('');
+    $('#register_email').val('');
+    $('#register_password').val('');
+    $('#register_confirm_password').val('');
+    $('#register_user').css('background-image', '');
+
+    $('#register_user').trigger('blur');
+    $('#register_email').trigger('blur');
+    $('#register_password').trigger('blur');
+    $('#register_confirm_password').trigger('blur');
+}
 
 //scroll to bottom of messages
 function scrollToBottom(){

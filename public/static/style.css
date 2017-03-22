@@ -17,6 +17,17 @@ body{
     left: 12.5%;
 }
 
+.info-message{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0%;
+    height: 7%;
+    margin-top: 2%;
+    background-color: #FEAB19;
+    color: black;
+    margin-bottom: 2%;
+}
 
 .login-dialog{
     /* centered dialog at 50% width and 75% height */
@@ -281,6 +292,16 @@ input[type="submit"]:hover{
     min-height:1px;
 }
 
+#register_user{
+   /* background: url(glyphicons/glyphicons-541-hourglass.png);*/
+    background-repeat: no-repeat;
+    background-position: right;
+    background-color: #404040;
+    color: #bfbfbf;
+    border-style: none;
+    border-width: 1px;
+}
+
 input[type="text"], input[type="password"], textarea {
     background-color: #404040;
     color: #bfbfbf;
@@ -290,11 +311,10 @@ input[type="text"], input[type="password"], textarea {
 
 input[type="text"]:focus, input[type="password"]:focus{
     border-width: 1px;
-    border: 1px solid #007399;;
+    border: 1px solid #007399;
     color: white;
     box-shadow: 0 0 5px;
 }
-
 
 .row5{
     width: 5%;
