@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="static/style.css">
+  </head>
+  <body>
+    <div class="user-message" id="user-message"><span id="user-message-content"></span><div id="tag-remove-message">x</div></div>
+    <div class="body-container">
+      <div class="header-container">
+	<div>Babble Messenger</div>
+	<!-- <div class="row15"><h4 id="whoami"></h4></div>
+	<div class="row85 center-horiz"><h4>Messages</h4></div> -->
+      </div>
+
+      
+      <div class="content-container">
+	<div class="users">
+	  <div id="view-users" class="col100 center-horiz">
+
+	  </div>
+	</div>
+
+	<div class="message-area">
+	  <div class="message-wrapper" id="message-wrapper">
+	    <div class="messages" id ="view-messages">
+	      <input type="file" id="selectedFile" />
+	      <!-- Messages will be displayed here -->
+	    </div>
+	  </div>
+	  <div class="send-message-area">
+	    <div class="message-input">
+	      <div class="row95" id="message-text">
+		<input id="input-msg" class="input-msg" type="text" placeholder="Message"></div>
+	      <div class="row5 right">
+		<span>
+		  <img id="submit-message" class="inverted clickable" src="static/glyphicons/glyphicons-11-envelope.png"></img>
+		</span>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/js/socket.io-stream.js"></script>
+    <!-- <script src="/static/js/recorder.js"></script> -->
+    <!-- <script src="/static/js/require.js"></script> -->
+    <script
+       src="https://code.jquery.com/jquery-3.1.1.min.js"
+       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+       crossorigin="anonymous"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script> 
+    <script src="/static/js/client.js"></script>
+  </body>
+</html>

@@ -22,6 +22,8 @@ app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
 
+var users = {};
+
 
 function testInsert(){
     //insert a row
@@ -58,7 +60,7 @@ app.use(sessions({
 }));
 
 app.get("/", function(req, res, next){
-    if(req.session.observed){
+/*    if(req.session.observed){
 	//user has been observed - dont make them log in (unless they haven't
 	//if the session has been seen, check if they are logged in.
 	console.log("I think I've seen you before...");
@@ -67,6 +69,7 @@ app.get("/", function(req, res, next){
 	console.log("You're new! Gotta log in...");
     }
     //do stuff on home get request
+*/
     next();
 });
 
@@ -79,84 +82,45 @@ app.post("/check_user", function(req, res){
 	    if(row == undefined)
 		res.send({ "available": true});
 	    else
-		res.send({"avaialbel": false});
+		res.send({"avaialble": false});
 	    console.log(row);
 	}
     });
 });
 
-//stub for login - check that password == user password in DB.
-app.post("/login", function(req, res){    
+//handle a get request directly to chat
+app.get("/chat.html", function(req, res){
+    if(req.session.user){
+	res.sendFile(path.join(__dirname, "public/chat.html"));
+    }else{
+	res.redirect("/");
+    }
+});
+
+// login request. Check if user and pass are good.
+app.post("/login", function(req, res){
     let query = "SELECT password FROM user WHERE user = ?";
-    db.get(query, req.body.user, function(error, row){
+    db.get(query, req.body.login_user, function(error, row){
 	if(error){
-	    
-	}else{
-	    var success = false;
-	    
-	    //verify that hash we had in the database is a 
-	    argon2.verify(row.password, req.body.password).then(match => {
-		if(match){
-		    console.log("Good password!");
-		    success = true;
-		}else{
-		    console.log(":(");
-		}
-		res.send({'success': success});
-	    });
-
-	    /*
-	    argon2.hash(req.body.password, salt, {
-		type: argon2.argon2d
-	    }).then(hash => {
-		var success = false;
-
-		console.log(hash);
-		console.log(row.password);
-
-		//verify that hash we had in the database is 
-		argon2.verify(row.password, req.body.password).then(match => {
-		    if(match){
-			console.log("Good password!");
-			success = true;
-		    }else{
-			console.log(":(");
-		    }
-		    res.send({'success': success});
-		});
-
-	    });
-	    */
-	}
-    });
-    /*
-    console.log(query);
-    
-    connection.query(query, function(error, result){
-	if (error){
 	    console.log(error);
 	}else{
-	    let salt = parseInt(result[0].password.join());
-	    
-	    argon2.hash(req.body.password, salt, {
-		type: argon2.argon2d
-	    }).then(hash => {
-		var success = false;
-		
-		argon2.verify(hash, psw).then(match => {
+	    var success = false;
+	    if(row){
+		//verify that hash we had in the database is a match
+		argon2.verify(row.password, req.body.login_password).then(match => {
 		    if(match){
-			console.log("Good password!");
+			console.log("Successful login for " + req.body.login_user);
 			success = true;
+			req.session.user = req.body.login_user;
 		    }else{
-			console.log(":(");
+			console.log("Failed login attempt for " + req.body.login_user);
 		    }
-		    res.send({'success': success});
+		    res.send({ 'success': success });
 		});
-
-	    });
-	}	   
+	    }else
+		res.send({ 'success': success });
+	}
     });
-    */
 });
 
 //stub for register - try to register user and log in DB.

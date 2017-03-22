@@ -18,8 +18,8 @@ body{
 
 }
 
-.login-wrapper{
-    position: absolute;;
+.flex-wrapper{
+    position: absolute;
     z-index: 3;
     width: 75%;
     height: 75%;
@@ -43,11 +43,32 @@ body{
     margin-bottom: 2%;
 }
 
-.login-dialog{
+.circle{
+    display: flex;
+    justify-content: center;
+    font-size: calc(15px + .4vw);
+    align-items: center;
+    color: white;
+    border-radius: 50%;
+    width: 40%;
+    height: 50%;
+    background-color: #007399;
+    /* width and height can be anything, as long as they're equal */
+}
+
+.circle:hover{
+    cursor: pointer;
+    background-color: white;
+    color: #007399;
+}
+
+.flex-centered{
     /* centered dialog at 50% width and 75% height */
     position: relative;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center space-around;
     z-index: 3;
 
     background-color: #333333;
@@ -68,6 +89,7 @@ body{
     border-style: none;
     border-right: solid;
 }
+
 
 .login-panel{
     position: relative;
