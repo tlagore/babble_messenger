@@ -24,27 +24,6 @@ io.use(socketIoCookieParser());
 
 var users = {};
 
-
-function testInsert(){
-    //insert a row
-    var stmt = db.prepare("INSERT INTO user (user, password, salt) values ('helllooo22', 'fun', 'stuff')")
-    stmt.run();
-    stmt.finalize();
-
-    //select all rows
-    db.each("SELECT * FROM user;",
-	    function(err, row){
-		console.log(row);
-	    });
-
-    //selet first row
-    db.get("SELECT * FROM user;",
-	    function(err, row){
-		console.log(row);
-	    });
-}
-
-
 http.listen( port, function () {
     console.log('listening on port', port);
 });
@@ -52,9 +31,12 @@ http.listen( port, function () {
 var ss = require('socket.io-stream');
 var path = require('path');
 
+
+//define our session cookie
 app.use(sessions({
     cookieName: 'session',
-    secret: genNonce(32),
+    //32 byte secret
+    secret: genSecret(32),
     duration: 30 * 60 * 1000, //session expires in 30 minutes
     activeDuration: 1000 * 60 * 5 //if session has not expired and user shows activity, extend session for 5 minutes.
 }));
@@ -73,6 +55,11 @@ app.get("/", function(req, res, next){
     next();
 });
 
+
+//////////////////////////////////////////////////////////////////////////////////////
+//                               Login Logic                                        //
+//////////////////////////////////////////////////////////////////////////////////////
+
 app.post("/check_user", function(req, res){
     let query = "SELECT user FROM user WHERE user = ?";
     db.get(query, req.body.user, function(error, row){
@@ -86,15 +73,6 @@ app.post("/check_user", function(req, res){
 	    console.log(row);
 	}
     });
-});
-
-//handle a get request directly to chat
-app.get("/chat.html", function(req, res){
-    if(req.session.user){
-	res.sendFile(path.join(__dirname, "public/chat.html"));
-    }else{
-	res.redirect("/");
-    }
 });
 
 // login request. Check if user and pass are good.
@@ -158,6 +136,23 @@ app.post("/register", function(req, res){
 	    })});
     }
 });
+//////////////////////////////////////////////////////////////////////////////////////
+//                            End login logic                                       //
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//                            Start chat logic                                      //
+//////////////////////////////////////////////////////////////////////////////////////
+//handle a get request directly to chat
+app.get("/chat.html", function(req, res){
+    if(req.session.user){
+	res.sendFile(path.join(__dirname, "public/chat.html"));
+    }else{
+	res.redirect("/");
+    }
+});
+
 
 app.use(express.static(__dirname + '/public'));
 
@@ -185,7 +180,7 @@ function logResponse(connection, query){
     });
 }
 
-function genNonce(size){
+function genSecret(size){
     var text = "";
     let validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
