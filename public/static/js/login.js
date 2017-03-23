@@ -10,7 +10,7 @@ $(function(){
     };
 
     $('#my-server').click(function(){
-	window.location.replace("chat.html");
+	window.location.replace("chat/0");
     });
 
     $('#register_user').on("input", function(){

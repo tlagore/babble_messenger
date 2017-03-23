@@ -145,7 +145,9 @@ app.post("/register", function(req, res){
 //                            Start chat logic                                      //
 //////////////////////////////////////////////////////////////////////////////////////
 //handle a get request directly to chat
-app.get("/chat.html", function(req, res){
+app.get("/chat/:serverId", function(req, res){
+    let serverId = req.params.serverId;
+    console.log("server requested: " + serverId);
     if(req.session.user){
 	res.sendFile(path.join(__dirname, "public/chat.html"));
     }else{
