@@ -4,8 +4,37 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <div class="settings-circle"></div>
-    <div id="settings-panel" class="settings-wrapper">wut</div>
+    <div id="settings-panel" class="settings-wrapper">
+      <div class="generic-panel">
+	<div class="abs-container">
+	  <img class="clickable" src="/static/glyphicons/glyphicons-281-settings-green.png" id="settings-btn"></img>
+	</div>
+	<h3>Settings</h3>
+	<div class="labeled-input">
+	  <div class="label">Nickname</div><input type="text" placeholder="nickname">
+	</div>
+	<div class="labeled-input">
+	  <div class="label">Phonetic</div><input type="text" placeholder="phonetic">
+	</div>
+	<div class="labeled-input">
+	  <div class="label">Other input</div><input type="text" placeholder="input">
+	</div>
+	<div class="labeled-input">
+	  <div class="label">Other input</div><input type="text" placeholder="input">
+	</div>
+	<span>Volume: <span id="vol_slider_txt">50</span></span>
+	<div class="slider_wrapper">
+	  <div id="vol_slider"></div>
+	</div>
+	<span>Mic Sensitivity: <span id="sens_slider_txt">50</span></span>
+	<div class="slider_wrapper">
+	  <div id="sens_slider"></div>
+	</div>
+	<div class="bottom-flex">
+	  <input id="save-settings" type="submit" value="Save">
+	</div>
+      </div>
+    </div>
     <div class="user-message" id="user-message"><span id="user-message-content"></span><div id="tag-remove-message">x</div></div>
     <div class="body-container">
       <div class="header-container">
@@ -31,18 +60,12 @@
 	  </div>
 	  <div class="send-message-area">
 	    <div class="message-input">
-	      <div class="row95" id="message-text">
-		<input id="input-msg" class="input-msg" type="text" placeholder="Message"></div>
-	      <div class="row5 right">
-		<span>
-		  <img id="submit-message" class="inverted clickable" src="/static/glyphicons/glyphicons-11-envelope.png"></img>
-		</span>
-	      </div>
-	    </div>
+	      <input id="input-msg" type="text" placeholder="Message"></div>
 	  </div>
 	</div>
       </div>
     </div>
+    <link rel="stylesheet" href="/static/jquery-ui.css">
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/socket.io-stream.js"></script>
     <!-- <script src="/static/js/recorder.js"></script> -->
@@ -51,7 +74,9 @@
        src="https://code.jquery.com/jquery-3.1.1.min.js"
        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
        crossorigin="anonymous"></script>
-   <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"></script> 
+<!--    <script src="//cdnjs.cloudflare.com/ajax/libs/Colors.js/1.2.3/colors.min.js"><
+/script>-->
+    <script src="/static/js/jquery-ui.js"></script>
     <script src="/static/js/client.js"></script>
   </body>
 </html>

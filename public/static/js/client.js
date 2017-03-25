@@ -37,10 +37,57 @@ $(function(){
 });
 
 
-//user clicked the x on the message
+/* Generic startup stuff */
 $(function(){
-    $('#user-message').hide();
+   $("#sens_slider").slider({
+        orientation: "horizontal",
+        range: false,
+        min: 0,
+        max: 100,
+        value: 50,
+        step: 1,
+        animate: true,
+        slide: function (event, ui) {
+            $("#sens_slider_txt").text(ui.value);
+        }
+    });
     
+    $("#vol_slider").slider({
+        orientation: "horizontal",
+        range: false,
+        min: 0,
+        max: 100,
+        value: 50,
+        step: 1,
+        animate: true,
+        slide: function (event, ui) {
+            $("#vol_slider_txt").text(ui.value);
+        }
+    });
+
+    $('#settings-btn').click(function(){
+	var winWidth = $(window).width() + "px";
+	var settingsPanel = $('#settings-panel');
+
+	if (settingsPanel.css('left') == winWidth){
+	    settingsPanel.animate({
+		left: '67%'
+	    }, 500, function(){});
+	}else{
+	    settingsPanel.animate({
+		left: '100%'
+	    }, 500, function(){});
+	}
+    });
+	
+
+    $('#save-settings').click(function(){
+	alert('Save settings.');
+    });
+    
+    $('#user-message').hide();
+
+    //user clicked the x on the message
     $('#tag-remove-message').click(function(){
 	$('#user-message').hide();
     });

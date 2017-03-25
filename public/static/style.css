@@ -31,6 +31,18 @@ body{
 }
 
 
+.labeled-input{
+    position: relative;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 7%;
+    margin-bottom: 1%;
+}
+
+
 /* SETTINGS PANEL CSS */
 .settings-wrapper{
     position: absolute;
@@ -38,13 +50,18 @@ body{
     width: 33%;
     height: 80%;
     top: 5%;
-    left: 67%;
+    /* where it should be if its visible */
+    /* left: 67%; */
+    left: 100%;
 
     /* Test settings */
     border-width: 2px;
     border-style: solid;
 }
 
+
+/* wanted to try to have a clickable circle for settings to pop out but it's 
+not working */
 .settings-circle{
     position: absolute;
     z-index: 3;
@@ -52,6 +69,7 @@ body{
     border-radius: 50%;
 }
 
+/* trying to set the width and height based on screen ratio, but its not working */
 @media screen and (min-aspect-ratio: 1/1){
     .settings-circle{
 	height: 5%;
@@ -80,10 +98,8 @@ body{
     }
 }
 
-
-
-
 /* END SETTINGS PANEL CSS */
+
 
 .info-message{
     display: flex;
@@ -131,6 +147,16 @@ body{
     
     border-width: 2px;
     border-style: solid;
+}
+
+.generic-panel{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background-color: #333333;
 }
 
 .register-panel{
@@ -187,6 +213,7 @@ div{
 h1, h2, h3, h4, h5{
     font-weight: normal;
     color: white;
+    background-color: inherit;
 }
 
 .center-horiz{
@@ -250,7 +277,7 @@ input[type="submit"]:hover{
 }
 
 .clickable:hover{
-    filter: invert(100%);
+    filter: invert(50%);
 }
 
 .inverted {
@@ -365,16 +392,10 @@ input[type="submit"]:hover{
     min-width: 200px;
 }
 
-.input-msg{
-    width: 95%;
-    height: 95%;
-}    
 
 .message-input{
     display: flex;
     flex-direction: row;
-    border-width: 2px;
-    border-style: solid;
     width: 95%;
     height: 50%;
 
@@ -398,13 +419,47 @@ input[type="text"], input[type="password"], textarea {
     color: #bfbfbf;
     border-style: none;
     border-width: 1px;
+    position: relative;
+    width: 90%;
 }
 
 input[type="text"]:focus, input[type="password"]:focus{
-    border-width: 1px;
-    border: 1px solid #007399;
-    color: white;
-    box-shadow: 0 0 5px;
+			      border-width: 1px;
+			      border: 1px solid #007399;
+			      color: white;
+			      box-shadow: 0 0 5px;
+			  }
+
+.message-input > input[type="text"]{
+    background: url(/static/glyphicons/glyphicons-11-envelope.png);
+    background-repeat: no-repeat;
+    background-position: 99% 50%;
+    background-color: #404040;
+    border: 0px solid red;
+    border: 1px solid gray;
+    height: 100%;
+}
+
+.slider_wrapper{
+    position: relative;
+    width: 90%;
+    margin-bottom: 2%;
+    margin-top: 2%;
+}
+
+.labeled-input > input[type="text"]{
+    height: 90%;
+}
+
+.abs-container{
+    position: absolute;
+    left: -7%;
+    top: 1%;
+}
+
+.label{
+    font-size: calc(8px + .5vw);
+    width: 40%;
 }
 
 .row5{
