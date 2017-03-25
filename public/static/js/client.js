@@ -39,6 +39,8 @@ $(function(){
 
 //user clicked the x on the message
 $(function(){
+    $('#user-message').hide();
+    
     $('#tag-remove-message').click(function(){
 	$('#user-message').hide();
     });
@@ -48,17 +50,19 @@ $(function(){
 function showMessage(msg){
     var user_message = $('#user-message');
     var user_message_content = $('#user-message-content');
+
+    user_message.show();
     user_message_content.html(msg);
     user_message.animate(
 	{
-	    height: '5%'
+	    top: '0%'
 	},
 	{
 	    duration: 1000,
 	    queue: false
 	})
 	.delay(5000)
-	.animate({ height: '0px' }, 1000,
+	.animate({ top: '-5%' }, 1000,
 		 function(){
 		     $(this).hide();
 		 });
