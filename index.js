@@ -21,7 +21,13 @@ var fs = require('fs');
 app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
-
+/*
+  user format:
+  {
+      "server": "server_id" //the server that the user is logged into
+      "channel": "channel_id" //the channel on that server the user is in
+  }
+*/
 var users = {};
 
 http.listen( port, function () {
@@ -30,7 +36,6 @@ http.listen( port, function () {
 
 var ss = require('socket.io-stream');
 var path = require('path');
-
 
 //define our session cookie
 app.use(sessions({
@@ -77,7 +82,7 @@ app.post("/check_user", function(req, res){
 
 // login request. Check if user and pass are good.
 app.post("/login", function(req, res){
-    let query = "SELECT password FROM user WHERE user = ?";
+    let query = "SELECT password, server_id FROM user WHERE user = ?";
     db.get(query, req.body.login_user, function(error, row){
 	if(error){
 	    console.log(error);
@@ -90,10 +95,14 @@ app.post("/login", function(req, res){
 			console.log("Successful login for " + req.body.login_user);
 			success = true;
 			req.session.user = req.body.login_user;
+			users[req.body.login_user] = { "server": undefined,
+						       "channel": undefined };
 		    }else{
 			console.log("Failed login attempt for " + req.body.login_user);
 		    }
-		    res.send({ 'success': success });
+		    /*res.redirect("/chat/" + row.server_id);*/		    
+		    res.send({ 'success': success,
+			       'server_id': row.server_id});
 		});
 	    }else
 		res.send({ 'success': success });
@@ -112,8 +121,10 @@ app.post("/register", function(req, res){
 	    argon2.hash(req.body.password, salt, {
 		type: argon2.argon2d
 	    }).then(hash => {
-		let query = "INSERT INTO user (user, password) values (?, ?)";
-		db.run(query, req.body.user, hash, function(err, results){
+		let query = "INSERT INTO user (user, password, server_id) values (?, ?, ?)";
+		let secret = genSecret(6);
+		db.run(query, req.body.user, hash, secret,
+		       function(err, results){
 		    if(err){
 			console.log("error...");
 			console.log(err);
@@ -142,14 +153,42 @@ app.post("/register", function(req, res){
 
 
 //////////////////////////////////////////////////////////////////////////////////////
+//                            Start channel logic                                   //
+//////////////////////////////////////////////////////////////////////////////////////
+
+app.post("/add_channel", function(req, res){
+    let channel = req.body.channel_name;
+    console.log(channel);
+});
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//                            End channel logic                                     //
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////////////////////////////////////
 //                            Start chat logic                                      //
 //////////////////////////////////////////////////////////////////////////////////////
 //handle a get request directly to chat
 app.get("/chat/:serverId", function(req, res){
     let serverId = req.params.serverId;
-    console.log("server requested: " + serverId);
+    let server_query = "SELECT server_id FROM user WHERE server_id = ?";
     if(req.session.user){
-	res.sendFile(path.join(__dirname, "public/chat.html"));
+	console.log(req.session.user + " requested server: " + serverId);
+	db.get(server_query, serverId, function(error, row){
+	    if (error){
+		res.status(500).send("Internal server error.");
+	    }else{
+		if (row == undefined){
+		    res.status(404).send("Chat server not found.");
+		}else{
+		    console.log(serverId);
+		    users[req.session.user].server = serverId;
+		    res.sendFile(path.join(__dirname, "public/chat.html"));	    
+		}
+	    }
+	});
     }else{
 	res.redirect("/");
     }
@@ -186,7 +225,7 @@ function genSecret(size){
     var text = "";
     let validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    for(var i = 0; i <= size; i++){
+    for(var i = 0; i < size; i++){
 	text += validChars.charAt(Math.floor(Math.random() * validChars.length));
     }
 

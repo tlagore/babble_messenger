@@ -1,3 +1,23 @@
+/*
+//ajax call format
+$.ajax({
+    url: '/method_name',
+    data: {
+    "data1_name": "data1",
+    "data2_name": "data2"
+    },
+    type: 'POST', //can change method type
+    success: function(data){
+        //ajax call returned successfully
+    },
+    error: function(xhr, status, error){
+        //ajax call failed - no server response
+    },
+});
+
+*/
+
+
 
 // document ready calls
 /* This disgusting hack of a function fixes the firefox bug without killing scrolling on 
@@ -20,7 +40,7 @@ navigator.getUserMedia = navigator.getUserMedia ||
 
 
 //load media device- audio. Asks user for permission to use microphone
-$(function(){
+$(function(){   
     navigator.mediaDevices.getUserMedia({ audio: true }).then(
 	function(stream){
 	    //recorder = new Recorder();
@@ -79,7 +99,27 @@ $(function(){
 	    }, 500, function(){});
 	}
     });
+
+    $('#add-channel').click(function(){
+	var channelName = prompt("Please enter a channel name");
 	
+	if(channelName != null){
+	    $.ajax({
+		url: '/add_channel',
+		data: {
+		    "channel_name": channelName
+		},
+		type: 'POST', //can change method type
+		success: function(data){
+		    //ajax call returned successfully
+		},
+		error: function(xhr, status, error){
+		    //ajax call failed - no server response
+		
+		},
+	    });
+	}
+    });
 
     $('#save-settings').click(function(){
 	alert('Save settings.');

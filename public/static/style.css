@@ -229,7 +229,12 @@ h1, h2, h3, h4, h5{
     align-items: center;
     flex-grow: 1;
     min-height: 25%;
-    margin-bottom: 5%;
+
+    /* webkit-padding overwrites chromes padding, seems they have a different height */
+    padding-bottom: 5%;
+    -webkit-padding-after: 15%;
+
+    
 }
 
 input[type="submit"]{

@@ -30,8 +30,7 @@ $(function(){
 	valid_char_check(event);
     });
 
-    $('#login_submit').click(function(){
-	
+    $('#login_submit').click(function(){	
 	$.ajax({
 	    url: '/login',
 	    data: {
@@ -43,16 +42,13 @@ $(function(){
 		console.log(data);
 		if(data.success){
 		    // handle next steps - user is authenticated
-		    console.log("good password");
+		    
 		    $('#login-wrapper').animate(
 			{
 			    left: "112%"
 			}, 500, function(){
-			    $('#server-or-you').animate(
-				{
-				    opacity: 1.0
-				}, 500, function(){}
-			    )
+
+			    window.location.replace("chat/" + data.server_id);
 			});
 			
 		}else{
