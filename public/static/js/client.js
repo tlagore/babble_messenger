@@ -38,8 +38,8 @@ $(function(){
 
 
 /* Generic startup stuff */
-$(function(){
-   $("#sens_slider").slider({
+$(function(){    
+    $("#sens_slider").slider({
         orientation: "horizontal",
         range: false,
         min: 0,

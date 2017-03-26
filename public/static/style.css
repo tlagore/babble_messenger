@@ -3,7 +3,9 @@ body{
     width: 100%;
     background-color: #333333;
     color: #8c8c8c;
-    font-family: Arial, sans-serif;
+    
+    /*font-family: Arial, sans-serif;*/
+    font-family: 'Raleway', sans-serif;
     overflow: hidden;
 }
 
@@ -224,6 +226,7 @@ h1, h2, h3, h4, h5{
 .bottom-flex{
     display: flex;
     flex-direction: column-reverse;
+    align-items: center;
     flex-grow: 1;
     min-height: 25%;
     margin-bottom: 5%;
@@ -238,6 +241,7 @@ input[type="submit"]{
     width: calc(100px + 5vw);
     height: calc(30px + 1vh);
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 input[type="submit"]:hover{
@@ -287,6 +291,7 @@ input[type="submit"]:hover{
 .header-container{
     display: flex;
     align-items: center;
+    justify-content: center;
     height: 5%;
     width: 100%;
 }
@@ -375,33 +380,71 @@ input[type="submit"]:hover{
     flex-shrink: 0;
 }
 
-.send-message-area{
-    display: flex;
-    justify-content: space-around;
-    flex-direction:row;
-    width: 100%;
-    height: 10%;
-    padding-bottom: 1%;
+.header-main{
+    font-weight: bold;
+    font-size: calc(15px + .3vw);
+    color: white;
+    /*color: #32a2f7;*/
 }
 
-.users{
+.send-message-area{
+    display: flex;
+    flex-direction:row;
+    justify-content: space-around;
+    width: 100%;
+    height: 10%;
+}
+
+.message-input{
+    width: 70%;
+    height: 50%;
+}
+
+.private-messages{
+    width: 25%;
+    height: 50%;
+    border-width: 1px;
+    border-style: solid;
+}
+
+/*************** channel jazz *************/
+
+.channel-wrapper{
+    display: flex;
+    position: relative;
+    flex-direction: column;
     border-width: 2px;
     border-top: solid;
-    border-right: solid; 
+    border-right: solid;
+    height: 100%;
     width: 15%;
     min-width: 200px;
 }
 
-
-.message-input{
+.channel{
     display: flex;
-    flex-direction: row;
-    width: 95%;
-    height: 50%;
-
-    min-height:1px;
+    flex-direction: column;
+    background-color: #333333;
 }
 
+.channel-header{
+    cursor: pointer;
+    color: white;
+    font-size: calc(12px + .6vw);
+}
+
+.channel-header:hover{
+    background-color: #007399;
+}
+
+.channel-user{
+    color: #007399;
+    font-size: calc(12px + .4vw);
+    margin-left: 10%;
+}
+
+
+/*************** end channel jazz **********/
 #register_user{
    /* background: url(glyphicons/glyphicons-541-hourglass.png);*/
     background-repeat: no-repeat;
@@ -415,6 +458,7 @@ input[type="submit"]:hover{
 }
 
 input[type="text"], input[type="password"], textarea {
+    box-sizing: border-box;
     background-color: #404040;
     color: #bfbfbf;
     border-style: none;
@@ -435,9 +479,9 @@ input[type="text"]:focus, input[type="password"]:focus{
     background-repeat: no-repeat;
     background-position: 99% 50%;
     background-color: #404040;
-    border: 0px solid red;
     border: 1px solid gray;
     height: 100%;
+    width: 100%;
 }
 
 .slider_wrapper{

@@ -38,19 +38,38 @@
     <div class="user-message" id="user-message"><span id="user-message-content"></span><div id="tag-remove-message">x</div></div>
     <div class="body-container">
       <div class="header-container">
-	<div>Babble Messenger</div>
+	<div class="header-main">Babble Messenger</div>
 	<!-- <div class="row15"><h4 id="whoami"></h4></div>
 	<div class="row85 center-horiz"><h4>Mes1sages</h4></div> -->
       </div>
       
       
       <div class="content-container">
-	<div class="users">
-	  <div id="view-users" class="col100 center-horiz">
-
+	<div class="channel-wrapper" id="channel-wrapper">
+	  <div class="channel-header">Channel 1</div>  
+	  <div class="channel">
+	    <div class="channel-user">Bob</div>
+	    <div class="channel-user">Annie</div>
+	    <div class="channel-user">George</div>
+	    <div class="channel-user">Wallump</div>	    
 	  </div>
+	  <div class="channel-header">Channel 2</div>
+	  <div class="channel">
+	    <div class="channel-user">Johnny</div>
+	  </div>
+	  <div class="channel-header">Channel 3</div>
+	  <div class="channel">
+	    <div class="channel-user">James</div>
+	  </div>
+	  <div class="channel-header">Channel 4</div>
+	  <div class="channel">
+	    <div class="channel-user">Rick James</div>
+	  </div>
+	  <div class="bottom-flex">
+	    <input type="submit" value="Add Channel">
+	  </div>	    
 	</div>
-
+	
 	<div class="message-area">
 	  <div class="message-wrapper" id="message-wrapper">
 	    <div class="messages" id ="view-messages">
@@ -60,12 +79,18 @@
 	  </div>
 	  <div class="send-message-area">
 	    <div class="message-input">
-	      <input id="input-msg" type="text" placeholder="Message"></div>
+	      <input id="input-msg" type="text" placeholder="Message">
+	    </div>
+	    <div class="private-messages">
+	      Pms will go here
+	    </div>
 	  </div>
 	</div>
       </div>
     </div>
     <link rel="stylesheet" href="/static/jquery-ui.css">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet"> 
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="/static/js/socket.io-stream.js"></script>
     <!-- <script src="/static/js/recorder.js"></script> -->
@@ -78,5 +103,6 @@
 /script>-->
     <script src="/static/js/jquery-ui.js"></script>
     <script src="/static/js/client.js"></script>
+    
   </body>
 </html>
