@@ -58,7 +58,21 @@ $(function(){
 
 
 /* Generic startup stuff */
-$(function(){    
+$(function(){
+    var socket = io();
+
+    socket.on("join_server", function(data){
+	var server_socket = io("/" + data.server);
+
+	server_socket.on('chat', function(data){
+	    alert(data.message);
+	});
+    });
+
+    socket.on("add_channel", function(data){
+	alert(data.channel);
+    });
+    
     $("#sens_slider").slider({
         orientation: "horizontal",
         range: false,
@@ -112,6 +126,11 @@ $(function(){
 		type: 'POST', //can change method type
 		success: function(data){
 		    //ajax call returned successfully
+		    if(data.success){
+
+		    }else{
+			alert(data.message);
+		    }
 		},
 		error: function(xhr, status, error){
 		    //ajax call failed - no server response

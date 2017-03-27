@@ -7,8 +7,6 @@ var config = require('./config');
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('babble.db');
 
-//var mysql = require('mysql');
-var sessions = require('client-sessions');
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var bodyParser = require("body-parser");
@@ -17,6 +15,9 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
 var fs = require('fs');
+var validator = require('validator');
+var ss = require('socket.io-stream');
+var path = require('path');
 
 app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,36 +30,72 @@ io.use(socketIoCookieParser());
   }
 */
 var users = {};
+var servers = {}; //number of users in server;
 
 http.listen( port, function () {
     console.log('listening on port', port);
 });
 
-var ss = require('socket.io-stream');
-var path = require('path');
 
-//define our session cookie
-app.use(sessions({
+////////////////////////////////////////////
+///////////sessions stuffs//////////////////
+////////////////////////////////////////////
+
+//var mysql = require('mysql');
+var sessions = require('express-session')({
     cookieName: 'session',
     //32 byte secret
     secret: genSecret(32),
     duration: 30 * 60 * 1000, //session expires in 30 minutes
-    activeDuration: 1000 * 60 * 5 //if session has not expired and user shows activity, extend session for 5 minutes.
-}));
+    activeDuration: 1000 * 60 * 5, //if session has not expired and user shows activity, extend session for 5 minutes.
+    resave: false,
+    saveUninitialized: false
+});
+//var ios = require('socket.io-express-session');
+var sharedsession = require('express-socket.io-session');
+app.use(sessions);
+io.use(sharedsession(sessions));
 
-app.get("/", function(req, res, next){
-/*    if(req.session.observed){
-	//user has been observed - dont make them log in (unless they haven't
-	//if the session has been seen, check if they are logged in.
-	console.log("I think I've seen you before...");
-    }else{
-	req.session.observed = true;
-	console.log("You're new! Gotta log in...");
-    }
-    //do stuff on home get request
-*/
+//////////////////////////////////////////////////////
+///////////   end session stuffs /////////////////////
+//////////////////////////////////////////////////////
+
+
+
+////////////////////////////////////////////////////////
+//////////////// generic middleware ////////////////////
+////////////////////////////////////////////////////////
+
+//ensures that all requests are revalidated - particularly when using the back and
+//forward navigation
+app.use(function(req, res, next){
+    res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
     next();
 });
+
+
+////////////////////////////////////////////////
+///////          socket stuffs          ////////
+////////////////////////////////////////////////
+
+
+io.on("connection", function(socket){
+    if(socket.handshake.session.user){
+	//console.log(socket.handshake.session.user);
+	socket.emit("join_server", {
+	    'server': users[socket.handshake.session.user].server
+	});
+    }else{
+	socket.emit("redirect", { 'location' : '/' });
+    }
+});
+
+////////////////////////////////////////////////
+///////          end socket stuffs     /////////
+////////////////////////////////////////////////
+
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +140,7 @@ app.post("/login", function(req, res){
 		    /*res.redirect("/chat/" + row.server_id);*/		    
 		    res.send({ 'success': success,
 			       'server_id': row.server_id});
+		    
 		});
 	    }else
 		res.send({ 'success': success });
@@ -158,7 +196,30 @@ app.post("/register", function(req, res){
 
 app.post("/add_channel", function(req, res){
     let channel = req.body.channel_name;
-    console.log(channel);
+    let server = users[req.session.user].server;
+
+    let query = "SELECT user FROM user WHERE server_id = ?";
+
+    db.get(query, server, function(error, row){
+	if(error){
+
+	}else{
+	    if(row && row.user == req.session.user){		  
+		if(validator.isAlphanumeric(channel)){
+		    console.log("good channel name: " + channel);
+		    io.emit("add_channel", {"channel": channel});
+		}else{
+		    console.log("bad channel name: " + channel);
+		    res.send({ 'success':false,
+			       'message':
+			       'Channel name must be alphanumeric (no spaces).' });
+		}
+	    }else{
+		res.send({ 'success': false,
+			   'message': "You're not the owner of this server." });
+	    }
+	}
+    });
 });
 
 
@@ -185,6 +246,15 @@ app.get("/chat/:serverId", function(req, res){
 		}else{
 		    console.log(serverId);
 		    users[req.session.user].server = serverId;
+
+		    //if there are any users increment the numer of users,
+		    //otherwise set the server = 1
+		    if (servers[serverId] == undefined){
+			console.log('new server, settings up namespace');
+			servers[serverId] = io.of("/" + serverId);
+			setupServer(servers[serverId]);
+		    }
+		    
 		    res.sendFile(path.join(__dirname, "public/chat.html"));	    
 		}
 	    }
@@ -194,6 +264,14 @@ app.get("/chat/:serverId", function(req, res){
     }
 });
 
+
+function setupServer(namespace){
+    namespace.on('connection', function(socket){
+	console.log('got connection on namespace');
+	namespace.emit('chat', { 'message': 'user joined' });
+    });
+    
+}
 
 app.use(express.static(__dirname + '/public'));
 
