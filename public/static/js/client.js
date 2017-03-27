@@ -67,11 +67,12 @@ $(function(){
 	server_socket.on('chat', function(data){
 	    alert(data.message);
 	});
+
+	server_socket.on("add_channel", function(data){
+	    alert(data.channel);
+	});
     });
 
-    socket.on("add_channel", function(data){
-	alert(data.channel);
-    });
     
     $("#sens_slider").slider({
         orientation: "horizontal",

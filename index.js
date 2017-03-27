@@ -207,7 +207,7 @@ app.post("/add_channel", function(req, res){
 	    if(row && row.user == req.session.user){		  
 		if(validator.isAlphanumeric(channel)){
 		    console.log("good channel name: " + channel);
-		    io.emit("add_channel", {"channel": channel});
+		    servers[server].emit("add_channel", { "channel": channel });
 		}else{
 		    console.log("bad channel name: " + channel);
 		    res.send({ 'success':false,
