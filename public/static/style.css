@@ -22,11 +22,11 @@ body{
 .flex-wrapper{
     position: absolute;
     z-index: 3;
-    width: 75%;
+    width: 90%;
     height: 75%;
 
     top: 12.5%;
-    left: 12.5%;
+    left: 5%;
 
     animation-duration: 0.5s;
     animation-name: slide-from-top;
@@ -37,11 +37,17 @@ body{
     position: relative;
     width: 90%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: space-between;
     min-height: 7%;
     margin-bottom: 1%;
+}
+
+@media screen and (min-width: 800px){
+    .labeled-input{
+	flex-direction: row;
+    }
 }
 
 
@@ -49,18 +55,17 @@ body{
 .settings-wrapper{
     position: absolute;
     z-index: 3;
-    width: 33%;
+    width: 50%;
     height: 80%;
     top: 5%;
     /* where it should be if its visible */
-    /* left: 67%; */
+    /* left: 50%; */
     left: 100%;
 
     /* Test settings */
     border-width: 2px;
     border-style: solid;
 }
-
 
 /* wanted to try to have a clickable circle for settings to pop out but it's 
 not working */
@@ -190,11 +195,17 @@ not working */
     position: absolute;
     color: black;
     z-index: 1;
-    top: -5%;
+    top: -10%;
     left: 0;
     width: 100%;
-    height: 5%;
+    height: 10%;
     background-color: #FEAB19;
+}
+
+@media screen and (min-width: 480px){
+    .user-message{
+	height: 5%;
+    }
 }
 
 #tag-remove-message{
@@ -243,8 +254,8 @@ input[type="submit"]{
     background-color: #007399;
     color: white;
     border-style: none;
-    width: calc(100px + 5vw);
-    height: calc(30px + 1vh);
+    width: calc(50px + 10vw);
+    height: calc(10px + 3vh);
     cursor: pointer;
     box-sizing: border-box;
 }
@@ -423,7 +434,7 @@ input[type="submit"]:hover{
     border-right: solid;
     height: 100%;
     width: 15%;
-    min-width: 200px;
+    min-width: 125px;
 }
 
 .channel{
@@ -502,8 +513,21 @@ input[type="text"]:focus, input[type="password"]:focus{
 
 .abs-container{
     position: absolute;
-    left: -7%;
+    left: -25%;
     top: 1%;
+}
+
+@media screen and (min-width: 720px){
+    .abs-container{
+	left: -15%;
+    }
+}
+
+
+@media screen and (min-width: 1080px){
+    .abs-container{
+	left: -6%;
+    }
 }
 
 .label{

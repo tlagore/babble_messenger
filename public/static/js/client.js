@@ -106,7 +106,7 @@ $(function(){
 
 	if (settingsPanel.css('left') == winWidth){
 	    settingsPanel.animate({
-		left: '67%'
+		left: '50%'
 	    }, 500, function(){});
 	}else{
 	    settingsPanel.animate({
@@ -169,7 +169,7 @@ function showMessage(msg){
 	    queue: false
 	})
 	.delay(5000)
-	.animate({ top: '-5%' }, 1000,
+	.animate({ top: '-10%' }, 1000,
 		 function(){
 		     $(this).hide();
 		 });
