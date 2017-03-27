@@ -39,14 +39,13 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     min-height: 7%;
     margin-bottom: 1%;
 }
 
-@media screen and (min-width: 800px){
+@media screen and (min-width: 640px){
     .labeled-input{
-	flex-direction: row;
+	flex-direction: row;	
     }
 }
 
@@ -143,7 +142,7 @@ not working */
     /* centered dialog at 50% width and 75% height */
     position: relative;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center space-around;
     z-index: 3;
@@ -172,9 +171,8 @@ not working */
     flex-direction: column;
     align-items: center;
     height: 100%;
-    width: 50%;
+    width: 100%;
     border-style: none;
-    border-right: solid;
 }
 
 .login-panel{
@@ -183,8 +181,22 @@ not working */
     flex-direction: column;
     align-items: center;
     height: 100%;
-    width: 50%;
+    width: 100%;
     border-style: none;
+}
+
+@media screen and (min-width: 640px){
+    .flex-centered{
+	flex-direction: row;
+    }
+    
+    .register-panel{
+	width: 50%;
+	border-right: solid;
+    }
+    .login-panel{
+	width: 50%;
+    }
 }
 
 .user-message{
@@ -202,7 +214,7 @@ not working */
     background-color: #FEAB19;
 }
 
-@media screen and (min-width: 480px){
+@media screen and (min-width: 640px){
     .user-message{
 	height: 5%;
     }
@@ -242,10 +254,13 @@ h1, h2, h3, h4, h5{
     min-height: 25%;
 
     /* webkit-padding overwrites chromes padding, seems they have a different height */
-    padding-bottom: 5%;
-    -webkit-padding-after: 15%;
+    padding-bottom: 5%;    
+}
 
-    
+@media screen and (min-width: 640px){
+    .bottom-flex{
+	-webkit-padding-after: 15%;
+    }
 }
 
 input[type="submit"]{
@@ -254,7 +269,7 @@ input[type="submit"]{
     background-color: #007399;
     color: white;
     border-style: none;
-    width: calc(50px + 10vw);
+    width: calc(40px + 10vw);
     height: calc(10px + 3vh);
     cursor: pointer;
     box-sizing: border-box;
@@ -266,8 +281,10 @@ input[type="submit"]:hover{
 
 .input-default{
     position: relative;
-    width: 90%;
-    height: 7%;
+
+    width: calc(50px + 10vw);
+    height: calc(30px + 3vh);
+
     margin-top: 2%;
     margin-bottom: 2%;
 }
@@ -312,10 +329,70 @@ input[type="submit"]:hover{
     width: 100%;
 }
 
+/*************** channel jazz *************/
+
+.channel-wrapper{
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    border-width: 2px;
+    border-top: solid;
+    border-right: solid;
+    height: 50;
+    width: 100%;
+    min-width: 125px;
+}
+
+.channel{
+    display: flex;
+    flex-direction: column;
+    background-color: #333333;
+}
+
+.channel-header{
+    cursor: pointer;
+    color: white;
+    font-size: calc(14px + 1vw);
+}
+
+.channel-header:hover{
+    background-color: #007399;
+}
+
+.channel-user{
+    color: #007399;
+    font-size: calc(14px + .8vw);
+    margin-left: 10%;
+}
+
+
+/*************** end channel jazz **********/
+
+
 .content-container{
     display: flex;
+    flex-direction: column-reverse;
     height: 95%;
     width: 100%;    
+}
+
+@media screen and (min-width: 640px){
+    .content-container{
+	flex-direction: row;
+    }
+
+    .channel-wrapper{
+	width: 15%;
+	height: 100%;
+    }
+
+    .channel-user{
+	font-size: calc(8px + .8vw);
+    }
+
+    .channel-header{
+	font-size: calc(8px + 1vw);
+    }
 }
 
 .message-area{
@@ -423,44 +500,6 @@ input[type="submit"]:hover{
     border-style: solid;
 }
 
-/*************** channel jazz *************/
-
-.channel-wrapper{
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    border-width: 2px;
-    border-top: solid;
-    border-right: solid;
-    height: 100%;
-    width: 15%;
-    min-width: 125px;
-}
-
-.channel{
-    display: flex;
-    flex-direction: column;
-    background-color: #333333;
-}
-
-.channel-header{
-    cursor: pointer;
-    color: white;
-    font-size: calc(12px + .6vw);
-}
-
-.channel-header:hover{
-    background-color: #007399;
-}
-
-.channel-user{
-    color: #007399;
-    font-size: calc(12px + .4vw);
-    margin-left: 10%;
-}
-
-
-/*************** end channel jazz **********/
 #register_user{
    /* background: url(glyphicons/glyphicons-541-hourglass.png);*/
     background-repeat: no-repeat;
@@ -508,7 +547,7 @@ input[type="text"]:focus, input[type="password"]:focus{
 }
 
 .labeled-input > input[type="text"]{
-    height: 90%;
+    height: 100%;
 }
 
 .abs-container{
@@ -517,7 +556,7 @@ input[type="text"]:focus, input[type="password"]:focus{
     top: 1%;
 }
 
-@media screen and (min-width: 720px){
+@media screen and (min-width: 640px){
     .abs-container{
 	left: -15%;
     }
@@ -531,7 +570,7 @@ input[type="text"]:focus, input[type="password"]:focus{
 }
 
 .label{
-    font-size: calc(8px + .5vw);
+    font-size: calc(12px + .5vw);
     width: 40%;
 }
 
