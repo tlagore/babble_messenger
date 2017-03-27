@@ -67,7 +67,7 @@ io.use(sharedsession(sessions));
 ////////////////////////////////////////////////////////
 
 //ensures that all requests are revalidated - particularly when using the back and
-//forward navigation
+//forward navigation to ensure that socket reconnects
 app.use(function(req, res, next){
     res.header('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
     next();
@@ -235,8 +235,13 @@ app.post("/add_channel", function(req, res){
 app.get("/chat/:serverId", function(req, res){
     let serverId = req.params.serverId;
     let server_query = "SELECT server_id FROM user WHERE server_id = ?";
+
+    //if user is logged in...
     if(req.session.user){
 	console.log(req.session.user + " requested server: " + serverId);
+
+
+	//ensure good server request
 	db.get(server_query, serverId, function(error, row){
 	    if (error){
 		res.status(500).send("Internal server error.");
@@ -244,11 +249,12 @@ app.get("/chat/:serverId", function(req, res){
 		if (row == undefined){
 		    res.status(404).send("Chat server not found.");
 		}else{
-		    console.log(serverId);
+		    console.log(req.session.user +  " joined server " + serverId);
+		    //set the server on the users session so that the user on to know where to communicate 
 		    users[req.session.user].server = serverId;
 
-		    //if there are any users increment the numer of users,
-		    //otherwise set the server = 1
+		    // we haven't seen this server yet, no users are on it, set up
+		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
 			console.log('new server, settings up namespace');
 			servers[serverId] = io.of("/" + serverId);
@@ -260,6 +266,7 @@ app.get("/chat/:serverId", function(req, res){
 	    }
 	});
     }else{
+	//user is not logged in, redirect to login.
 	res.redirect("/");
     }
 });
@@ -274,7 +281,7 @@ function setupServer(namespace){
 }
 
 app.use(express.static(__dirname + '/public'));
-
+/*
 io.of('/').on('connection', function(socket){
     ss(socket).on('write-file', function(stream, data){
 	console.log("in here");
@@ -283,6 +290,8 @@ io.of('/').on('connection', function(socket){
 	stream.pipe(fs.createWriteStream(filename));
     })
 });
+
+*/
 
 var toType = function(obj) {
   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
