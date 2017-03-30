@@ -15,10 +15,10 @@
       <div class="flex-centered">
 	<div class="register-panel">
 	  <h2>Register</h2>
-	  <input onPaste="return false" id="register_user" class="input-default" type="text" placeholder="User Name">
-	  <input id="register_email" class="input-default" type="text" placeholder="Email (optional)">
-	  <input id="register_password" class="input-default" type="password" placeholder="Password">
-	  <input id="register_confirm_password" class="input-default" type="password" placeholder="Repeat Password">
+	  <input onPaste="return false" id="register_user" class="input-default" type="text" maxlength="35" placeholder="User Name">
+	  <input id="register_email" class="input-default" type="text" maxlength="254" placeholder="Email (optional)">
+	  <input id="register_password" class="input-default" type="password" maxlength="75" placeholder="Password">
+	  <input id="register_confirm_password" class="input-default" type="password" maxlength="75" placeholder="Repeat Password">
 	  <div id="register_message" class="info-message"></div>
 	  <div class="bottom-flex">
 	    <input id="register_submit" type="submit" value="register">
@@ -28,8 +28,8 @@
 	<div class="login-panel">
 	  <!--<form class="login-panel" action="chat" method="post"> -->
 	  <h2>Login</h2>
-	  <input name="login_user" onPaste="return false" id="login_user" class="input-default" type="text" placeholder="User Name">
-	  <input name="login_password" id="login_password" class="input-default" type="password" placeholder="Password">
+	  <input name="login_user" onPaste="return false" id="login_user" class="input-default" type="text" maxlength="35" placeholder="User Name">
+	  <input name="login_password" id="login_password" class="input-default" type="password" maxlength="75" placeholder="Password">
 	  <div id="login_message" class="info-message"></div>
 	  <div class="bottom-flex">
 	    <input id="login_submit" type="submit" value="login">

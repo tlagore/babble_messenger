@@ -175,6 +175,14 @@ not working */
     border-style: none;
 }
 
+#register_message {
+    border-radius: 3px;
+}
+
+#login_message {
+    border-radius: 3px;
+}
+
 .login-panel{
     position: relative;
     display: flex;
@@ -269,6 +277,7 @@ input[type="submit"]{
     background-color: #007399;
     color: white;
     border-style: none;
+    border-radius: 3px;
     width: calc(40px + 10vw);
     height: calc(10px + 3vh);
     cursor: pointer;
@@ -287,6 +296,10 @@ input[type="submit"]:hover{
 
     margin-top: 2%;
     margin-bottom: 2%;
+
+    padding: 10px;
+    
+    border-radius: 3px;
 }
 
 .body-container{
@@ -535,6 +548,7 @@ input[type="text"]:focus, input[type="password"]:focus{
     background-position: 99% 50%;
     background-color: #404040;
     border: 1px solid gray;
+    padding: 5px;
     height: 100%;
     width: 100%;
 }
@@ -547,6 +561,7 @@ input[type="text"]:focus, input[type="password"]:focus{
 }
 
 .labeled-input > input[type="text"]{
+    padding: 5px;
     height: 100%;
 }
 
