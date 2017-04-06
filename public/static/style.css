@@ -356,6 +356,14 @@ input[type="submit"]:hover{
     min-width: 125px;
 }
 
+.channel-header-main{
+    font-size: calc(15px + 1vw);
+    color: white;
+    border-bottom: solid;
+    border-thickness: 1px;
+    
+}
+
 .channel{
     display: flex;
     flex-direction: column;
@@ -379,6 +387,7 @@ input[type="submit"]:hover{
 }
 
 
+
 /*************** end channel jazz **********/
 
 
@@ -388,6 +397,7 @@ input[type="submit"]:hover{
     height: 95%;
     width: 100%;    
 }
+
 
 @media screen and (min-width: 640px){
     .content-container{
@@ -406,7 +416,13 @@ input[type="submit"]:hover{
     .channel-header{
 	font-size: calc(8px + 1vw);
     }
+
+    .channel-header-main{
+	font-size: calc(9px + 1vw);
+    }
 }
+
+
 
 .message-area{
     display: flex;

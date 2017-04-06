@@ -62,8 +62,10 @@ $(function(){
     var socket = io();
 
     socket.on("join_server", function(data){
-	var server_socket = io("/" + data.server);
 
+	$('#server-name').html(data.owner + "'s server");
+	var server_socket = io("/" + data.server);
+	
 	server_socket.on('chat', function(data){
 	    alert(data.message);
 	});

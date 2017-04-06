@@ -82,8 +82,10 @@ app.use(function(req, res, next){
 io.on("connection", function(socket){
     if(socket.handshake.session.user){
 	//console.log(socket.handshake.session.user);
+	let server = users[socket.handshake.session.user].server;
 	socket.emit("join_server", {
-	    'server': users[socket.handshake.session.user].server
+	    'server': server,
+	    'owner': servers[server].owner
 	});
     }else{
 	socket.emit("redirect", { 'location' : '/' });
@@ -93,9 +95,6 @@ io.on("connection", function(socket){
 ////////////////////////////////////////////////
 ///////          end socket stuffs     /////////
 ////////////////////////////////////////////////
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -199,15 +198,35 @@ app.post("/add_channel", function(req, res){
     let server = users[req.session.user].server;
 
     let query = "SELECT user FROM user WHERE server_id = ?";
+    let channels = "SELECT channel_name FROM channels WHERE server_id = ? and channel_name = ?";
 
     db.get(query, server, function(error, row){
 	if(error){
 
 	}else{
-	    if(row && row.user == req.session.user){		  
+	    if(row && row.user == req.session.user){
+		let goodChannel = false;
 		if(validator.isAlphanumeric(channel)){
-		    console.log("good channel name: " + channel);
-		    servers[server].emit("add_channel", { "channel": channel });
+		    db.get(channels, server, channel, function(error, row){
+			if (error){
+			    //something went wrong with query
+			}else{
+			    //server does not already have a channel named 'channel'
+			    if (!row){
+				goodChannel = true;
+			    }
+			}
+		    });
+
+		    if (goodChannel = true){			
+			console.log("good channel name: " + channel);
+			servers[server].server.emit("add_channel", { "channel": channel });
+		    }else{
+			console.log("A channel with that name already exists on this server.")
+			res.send({ 'success':false,
+				   'message':
+				   'Channel name must be alphanumeric (no spaces).' });
+		    }
 		}else{
 		    console.log("bad channel name: " + channel);
 		    res.send({ 'success':false,
@@ -234,7 +253,7 @@ app.post("/add_channel", function(req, res){
 //handle a get request directly to chat
 app.get("/chat/:serverId", function(req, res){
     let serverId = req.params.serverId;
-    let server_query = "SELECT server_id FROM user WHERE server_id = ?";
+    let server_query = "SELECT server_id, user FROM user WHERE server_id = ?";
 
     //if user is logged in...
     if(req.session.user){
@@ -251,14 +270,16 @@ app.get("/chat/:serverId", function(req, res){
 		}else{
 		    console.log(req.session.user +  " joined server " + serverId);
 		    //set the server on the users session so that the user on to know where to communicate 
-		    users[req.session.user].server = serverId;
 
+		    users[req.session.user].server = serverId;
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
+			servers[serverId] = {};
 			console.log('new server, settings up namespace');
-			servers[serverId] = io.of("/" + serverId);
-			setupServer(servers[serverId]);
+			servers[serverId].server = io.of("/" + serverId);
+			servers[serverId].owner = row.user;
+			setupServer(servers[serverId].server, serverId);
 		    }
 		    
 		    res.sendFile(path.join(__dirname, "public/chat.html"));	    
@@ -272,11 +293,26 @@ app.get("/chat/:serverId", function(req, res){
 });
 
 
-function setupServer(namespace){
+function setupServer(namespace, serverId){
+    channels = "SELECT channel_name FROM channels WHERE server_id = ?";
+    
     namespace.on('connection', function(socket){
 	console.log('got connection on namespace');
 	namespace.emit('chat', { 'message': 'user joined' });
     });
+
+    /*
+    db.all(channels, serverId, function(error, rows){
+	if(error){
+
+	}else{
+	    for (row in rows){
+		let channel = namespace.sockets.in(row.channel_name);
+		//channel.on('leave')
+	    }
+	}
+    });
+    */
     
 }
 
