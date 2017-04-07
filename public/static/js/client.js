@@ -66,14 +66,32 @@ $(function(){
 	$('#server-name').html(data.owner + "'s server");
 	var server_socket = io("/" + data.server);
 	
-	server_socket.on('chat', function(data){
-	    alert(data.message);
+	server_socket.on('startup', function(data){
+	    //alert(data.message) - a general purpose message from the server
+
+	    for(let i = 0; i < data.channels.length; i++){
+		$('#channel-wrapper').prepend(formattedChannel(data.channels[i]));
+	    }	   
+	});
+
+	server_socket.on("user_joined", function(data){
+	    //data.user - user who joined the server
+	    //data.channel - channel to put the user in
+	    $('#channel-' + data.channel).append(formattedChannelUser(data.channel, data.user));
 	});
 
 	server_socket.on("add_channel", function(data){
-	    alert(data.channel);
+	    $('#channel-wrapper').prepend(formattedChannel(data.channel));
 	});
     });
+
+    function formattedChannelUser(channel, user){
+	return '<div class="channel-user" id="' + channel + '-' + user + '">' + user + '</div>';
+    }
+
+    function formattedChannel(channel_name){
+	return '<div class="channel-header" id="channel-' + channel_name + '">' + channel_name + '</div>';
+    }
 
     
     $("#sens_slider").slider({

@@ -160,19 +160,28 @@ app.post("/register", function(req, res){
 	    }).then(hash => {
 		let query = "INSERT INTO user (user, password, server_id) values (?, ?, ?)";
 		let secret = genSecret(6);
-		db.run(query, req.body.user, hash, secret,
-		       function(err, results){
+		db.run(query, req.body.user, hash, secret, function(err, results){
 		    if(err){
 			console.log("error...");
 			console.log(err);
 			res.send({'success': false, 'message': msg});
 		    }else{
 			//good insert
+			let chan_query = "INSERT INTO channels (server_id, channel_name) values (?, ?);"
+			//insert default channel into user
+			db.run(chan_query, secret, "DefaultChannel", function(err, results){
+			    if (err){
+				console.log("error...");
+				console.log(err);
+				res.send({'success': false, 'message': msg});
+			    }
+			});
+
 			console.log("Good username");
 			res.send({'success': true, 'message': msg});
 		    }
 		});
-
+		
 		console.log("raw password: " + req.body.password);
 		console.log("salt: " + parseInt(salt.join()) + " hash: " + hash);
 		
@@ -272,6 +281,7 @@ app.get("/chat/:serverId", function(req, res){
 		    //set the server on the users session so that the user on to know where to communicate 
 
 		    users[req.session.user].server = serverId;
+		    users[req.session.user].channel = "DefaultChannel";
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
@@ -294,17 +304,43 @@ app.get("/chat/:serverId", function(req, res){
 
 
 function setupServer(namespace, serverId){
-    channels = "SELECT channel_name FROM channels WHERE server_id = ?";
+    let channel_query = "SELECT channel_name FROM channels WHERE server_id = ?";
+
+    namespace.use(sharedsession(sessions));
     
     namespace.on('connection', function(socket){
 	console.log('got connection on namespace');
-	namespace.emit('chat', { 'message': 'user joined' });
+
+	users[socket.handshake.session.user].socket = socket;
+
+	let channels = []
+	db.all(channel_query, serverId, function(error, rows){
+	    if (error){
+	    }else{
+		if (rows != undefined){
+		    for (let i = 0; i < rows.length; i++){
+			channels.push(rows[i].channel_name);
+		    }
+		    
+		    let user = socket.handshake.session.user;
+
+		    socket.emit('startup', { 'message': 'user joined',
+					     'channels': channels,
+					   });
+
+
+		    namespace.emit('user_joined', {
+			'user': user,
+			channel: users[user].channel
+		    });
+		}
+	    }
+	});
     });
-
     /*
-    db.all(channels, serverId, function(error, rows){
+      db.all(channels, serverId, function(error, rows){
 	if(error){
-
+	
 	}else{
 	    for (row in rows){
 		let channel = namespace.sockets.in(row.channel_name);

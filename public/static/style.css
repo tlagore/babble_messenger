@@ -337,7 +337,6 @@ input[type="submit"]:hover{
 .header-container{
     display: flex;
     align-items: center;
-    justify-content: center;
     height: 5%;
     width: 100%;
 }
@@ -356,12 +355,9 @@ input[type="submit"]:hover{
     min-width: 125px;
 }
 
-.channel-header-main{
-    font-size: calc(15px + 1vw);
+.server-header-main{
+    font-size: calc(13px + .7vw);
     color: white;
-    border-bottom: solid;
-    border-thickness: 1px;
-    
 }
 
 .channel{
@@ -506,7 +502,13 @@ input[type="submit"]:hover{
     font-weight: bold;
     font-size: calc(15px + .3vw);
     color: white;
+    width: 75%;
     /*color: #32a2f7;*/
+}
+@media screen and (min-width: 640px){
+    .header-main{
+	width: 50%;
+    }
 }
 
 .send-message-area{
@@ -545,6 +547,7 @@ input[type="text"], input[type="password"], textarea {
     box-sizing: border-box;
     background-color: #404040;
     color: #bfbfbf;
+    font-size: calc(10px + .5vw);
     border-style: none;
     border-width: 1px;
     position: relative;
