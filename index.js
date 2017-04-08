@@ -316,6 +316,12 @@ app.get("/chat/:serverId", function(req, res){
 function setupServer(namespace, serverId){
     namespace.use(sharedsession(sessions));
 
+    /*
+      channels format is 
+      [  
+          [channel name, [list of users]]
+      ]
+     */
     servers[serverId].channels = [];
     
     let channel_query = "SELECT channel_name FROM channels WHERE server_id = ?";
@@ -359,6 +365,10 @@ function setupServer(namespace, serverId){
 	namespace.emit('user_joined', {
 	    'user': user,
 	    channel: users[user].channel
+	});
+
+	socket.on("change_channel", function(data){
+	    console.log(user + " wants to change to channel " + data);
 	});
 
 	// setup events for that socket

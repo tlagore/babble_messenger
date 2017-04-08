@@ -61,6 +61,7 @@ $(function(){
 $(function(){
     var socket = io();
     var whoami = "";
+    var mychannel = "";
     socket.on("join_server", function(data){
 
 	$('#server-name').html(data.owner + "'s server");
@@ -70,6 +71,7 @@ $(function(){
 	    //alert(data.message) - a general purpose message from the server
 	    
 	    whoami = data.whoami;
+	    mychannel = data.channels[0][0];
 
 	    for(let i = data.channels.length - 1; i >= 0; i--){
 		let channel = formattedChannel(data.channels[i][0]);
@@ -105,27 +107,43 @@ $(function(){
 	server_socket.on("add_channel", function(data){
 	    $('#channel-wrapper').prepend(formattedChannel(data.channel));
 	});
+
+	function changeChannel(channel){
+	    if (channel.html() != mychannel){
+		server_socket.emit('change_channel', channel.html());
+	    }
+	}
+
+	server_socket.on('channel_change', function(data){
+	    user = data.user;
+	    channel = data.channel;
+	});
+
+	function formattedChannelUser(user){
+	    let $div = $('<div>', {
+		'id': user,
+		'class': 'channel-user',
+		'text': user
+	    });
+	    
+	    return $div;
+	}
+	
+	function formattedChannel(channel_name){
+	    let $div = $('<div>',{
+		'id' : 'channel-' + channel_name,
+		'class': 'channel-header',
+		'text': channel_name
+	    });
+	    
+	    $div.on('click', function(){
+		changeChannel($div);
+	    });
+	    
+	    return $div;
+	}	
     });
 
-    function formattedChannelUser(user){
-	let $div = $('<div>', {
-	    'id': user,
-	    'class': 'channel-user',
-	    'text': user
-	});
-
-	return $div;
-    }
-
-    function formattedChannel(channel_name){
-	let $div = $('<div>',{
-	    'id' : 'channel-' + channel_name,
-	    'class': 'channel-header',
-	    'text': channel_name
-	});
-
-	return $div;
-    }
 
     
     $("#sens_slider").slider({
