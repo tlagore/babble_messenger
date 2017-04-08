@@ -69,7 +69,7 @@ $(function(){
 	server_socket.on('startup', function(data){
 	    //alert(data.message) - a general purpose message from the server
 
-	    for(let i = 0; i < data.channels.length; i++){
+	    for(let i = data.channels.length - 1; i >= 0; i--){
 		$('#channel-wrapper').prepend(formattedChannel(data.channels[i]));
 	    }	   
 	});

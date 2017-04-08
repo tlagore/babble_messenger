@@ -221,7 +221,8 @@ app.post("/add_channel", function(req, res){
 			    //something went wrong with query
 			}else{
 			    //server does not already have a channel named 'channel'
-			    if (!row){
+			    if (!row){				
+				insertChannel(server, channel);
 				goodChannel = true;
 			    }
 			}
@@ -250,6 +251,14 @@ app.post("/add_channel", function(req, res){
     });
 });
 
+function insertChannel(serverId, channel){
+    let query = "INSERT INTO channels (server_id, channel_name) VALUES (?, ?);";
+    db.run(query, serverId, channel, function(error, row){
+	if (error){
+	    console.log('Error inserting channel ' + channel + ' for server ' + server);
+	}	    
+    });
+}
 
 //////////////////////////////////////////////////////////////////////////////////////
 //                            End channel logic                                     //
