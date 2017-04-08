@@ -57,7 +57,7 @@ $(function(){
 });
 
 
-/* Generic startup stuff */
+/* Setup our socket to handle events */
 $(function(){
     var socket = io();
     var whoami = "";
@@ -68,21 +68,35 @@ $(function(){
 	
 	server_socket.on('startup', function(data){
 	    //alert(data.message) - a general purpose message from the server
-
-	    whoami = data.whoami;
 	    
+	    whoami = data.whoami;
+
 	    for(let i = data.channels.length - 1; i >= 0; i--){
-		$('#channel-wrapper').prepend(formattedChannel(data.channels[i]));
-	    }	   
+		let channel = formattedChannel(data.channels[i][0]);
+		$('#channel-wrapper').prepend(channel);
+		for(let j = 0; j < data.channels[i][1].length; j++){
+		    let user = formattedChannelUser(data.channels[i][1][j]);
+		    user.insertAfter(channel);
+		}
+	    }
+	});
+
+	//the server 
+	server_socket.on("channel_message", function(data){
+	    //messages specific to the users channel will arrive here
+	});
+
+	server_socket.on("user_left", function(data){
+	    $('#' + data.user).remove();
 	});
 
 	server_socket.on("user_joined", function(data){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
-	    formattedChannelUser(data.channel, data.user).insertAfter($('#channel-' + data.channel));
-
-	    if (data.user != whoami)
+	    if (data.user != whoami){	    
+		formattedChannelUser(data.user).insertAfter($('#channel-' + data.channel));
 		responsiveVoice.speak(data.user + " has joined the server.");
+	    }
 
 	    //Use this to see a list of possible voice types
 	    //alert(JSON.stringify(responsiveVoice.getVoices()));
@@ -93,9 +107,9 @@ $(function(){
 	});
     });
 
-    function formattedChannelUser(channel, user){
+    function formattedChannelUser(user){
 	let $div = $('<div>', {
-	    'id': channel + '-' + user,
+	    'id': user,
 	    'class': 'channel-user',
 	    'text': user
 	});
@@ -341,7 +355,7 @@ $(function(){
 	    $('#view-users').append('<h4 style="color:' + color + ';" id=' + new_name + '>' + new_name + '</h4>');
 	}
     });
-    
+    */
     $('#input-msg').keydown(function(event){	
 	let history = JSON.parse(localStorage.getItem("history"));
 	let count = parseInt(localStorage.getItem("history_count"));
@@ -352,46 +366,20 @@ $(function(){
 	    
 	}else if(event.keyCode == 38){
 	    //up arrow
-	    if(count > 0){
-		$('#input-msg').val(history.chat_history[count - 1].toString());
-		count --;
-		localStorage.setItem("history_count", count.toString());
-	    }
 	}else if(event.keyCode == 40){
-
 	    //down arrow
-	    if (count < history.chat_history.length - 1){
-		$('#input-msg').val(history.chat_history[count + 1].toString());
-		count ++;
-		localStorage.setItem("history_count", count.toString());
-	    }
 	}else if(event.keyCode == 13){
 	    let msg = $('#input-msg').val();
 	    
 	    if(msg != ''){
-		count++;
-		history.chat_history.push(msg);
-		localStorage.setItem("history", JSON.stringify(history));
-		localStorage.setItem("history_count", count.toString());
-
-		
-		if(msg.startsWith("/nickcolor")){
-		    let goodColor =  verifyColor(msg);
-		    if (goodColor){
-			socket.emit('chat', msg);
-		    }else{
-			send_server_message("Bad color. Try another css color. (lower case)");
-		    }
-		}else{
-		    if(msg != ''){
-			socket.emit('chat', msg);
-		    }
-		}
+		//just a joke for now because I'm going crazy, need some fun
+		responsiveVoice.speak(msg);
 	    }
 
 	    $('#input-msg').val('');
 	}
     });
+    /*
     
     $('#submit-message').click(function(){
 	let msg = $('#input-msg').val()

@@ -312,42 +312,78 @@ app.get("/chat/:serverId", function(req, res){
 });
 
 
+
 function setupServer(namespace, serverId){
-    let channel_query = "SELECT channel_name FROM channels WHERE server_id = ?";
-
     namespace.use(sharedsession(sessions));
+
+    servers[serverId].channels = [];
     
-    namespace.on('connection', function(socket){
-	console.log('got connection on namespace');
-
-	users[socket.handshake.session.user].socket = socket;
-
-	servers[serverId].channels = [];
-	db.all(channel_query, serverId, function(error, rows){
-	    if (error){
-	    }else{
-		if (rows != undefined){
-		    console.log("Servers channels: ");
-		    console.log(rows);
-		    for (let i = 0; i < rows.length; i++){
-			servers[serverId].channels.push(rows[i].channel_name);
-		    }
-		    
-		    let user = socket.handshake.session.user;
-
-		    socket.emit('startup', { 'message': 'user joined',
-					     'channels': servers[serverId].channels,
-					     'whoami' : socket.handshake.session.user
-					   });
-
-		    namespace.emit('user_joined', {
-			'user': user,
-			channel: users[user].channel
-		    });
+    let channel_query = "SELECT channel_name FROM channels WHERE server_id = ?";
+    db.all(channel_query, serverId, function(error, rows){
+	if (error){
+	}else{
+	    if (rows != undefined){
+		console.log("Servers channels: ");
+		console.log(rows);
+		for (let i = 0; i < rows.length; i++){
+		    //channels holds a tuple [channel_name, [list of users]]
+		    let channel = rows[i].channel_name
+		    servers[serverId].channels.push([channel, []]);
 		}
 	    }
+	}
+    });
+    
+    namespace.on('connection', function(socket){
+	console.log('got connection on namespace: ' + serverId);
+	users[socket.handshake.session.user].socket = socket;
+
+	let user = socket.handshake.session.user;
+
+	if (!userInChannel(user, servers[serverId].channels[0])){
+	    servers[serverId].channels[0][1].push(user);
+	}
+		   
+	socket.emit('startup', { 'message': 'user joined',
+				 'channels': servers[serverId].channels,
+				 'whoami' : socket.handshake.session.user,
+			       });
+
+
+	//join the user to DefaultChannel.
+	socket.join(users[user].channel);
+
+	//this is how we emit to a specific channel
+	namespace.to(users[user].channel).emit('channel_message');
+	
+	namespace.emit('user_joined', {
+	    'user': user,
+	    channel: users[user].channel
+	});
+
+	// setup events for that socket
+	socket.on('disconnect', function(){
+	    let user = this.handshake.session.user;
+	    namespace.emit('user_left', {
+		'user': user
+	    });
 	});
     });
+
+
+    //
+    function userInChannel(user, channel){
+	console.log(channel);
+	let userExists  = false;
+	for(let i = 0; i < channel[1].length; i++){
+	    if(user == channel[1][i]){
+		userExists = true;
+		break;
+	    }
+	}
+
+	return userExists;
+    }
     /*
       db.all(channels, serverId, function(error, rows){
 	if(error){
@@ -360,8 +396,10 @@ function setupServer(namespace, serverId){
 	}
     });
     */
-    
 }
+
+
+
 
 app.use(express.static(__dirname + '/public'));
 /*
