@@ -73,6 +73,7 @@ $(function(){
 	    //might be useful for client to know who they are and channel they are in
 	    whoami = data.whoami;
 	    mychannel = data.channels[0][0];
+	    $('#channel-wrapper').empty();
 
 	    for(let i = data.channels.length - 1; i >= 0; i--){
 		let channel = formattedChannel(data.channels[i][0]);
@@ -82,6 +83,17 @@ $(function(){
 		    user.insertAfter(channel);
 		}
 	    }
+	});
+
+	server_socket.on("channel_text_message", function(data){
+	    let user = data.user;
+	    let time = data.time;
+	    let msg = data.msg;
+
+	    console.log(msg);
+
+	    let formatted_msg = generate_message(user, time, msg);
+	    $('#view-messages').prepend(formatted_msg);
 	});
 
 	//the server 
@@ -106,7 +118,7 @@ $(function(){
 	});
 
 	server_socket.on("add_channel", function(data){
-	    $('#channel-wrapper').prepend(formattedChannel(data.channel));
+	    formattedChannel(data.channel).insertAfter($('.channel-header').last());
 	});
 
 	function changeChannel(channel){
@@ -138,6 +150,31 @@ $(function(){
 	    $('#' + user).insertAfter('#channel-' + channel);
 	});
 
+	$('#input-msg').keydown(function(event){	
+	    //let history = JSON.parse(localStorage.getItem("history"));
+	    //let count = parseInt(localStorage.getItem("history_count"));
+	
+	    if(event.keyCode  == 27){
+		event.preventDefault();
+		$('#input-msg').val('');
+		
+	    }else if(event.keyCode == 38){
+		//up arrow
+	    }else if(event.keyCode == 40){
+		//down arrow
+	    }else if(event.keyCode == 13){
+		let msg = $('#input-msg').val();
+		
+		if(msg != ''){
+		    //just a joke for now because I'm going crazy, need some fun
+		    responsiveVoice.speak(msg);
+		    server_socket.emit("channel_text_message", { 'message' : msg });
+		}
+		
+		$('#input-msg').val('');
+	    }
+	});
+
 	function formattedChannelUser(user){
 	    let $div = $('<div>', {
 		'id': user,
@@ -162,7 +199,7 @@ $(function(){
 	    return $div;
 	}
 
-	function generate_message(user, timestamp, msg, utc, color){
+	function generate_message(user, timestamp, msg){
 	    let $message = $('<div>', {
 		'class' : 'message',		
 	    });
@@ -193,24 +230,6 @@ $(function(){
 	    $contents.appendTo($message);
 
 	    return $message;
-	    /*
-	    if (user == "server"){
-		return server_message(utc, msg, color)
-	    }else{
-		let message = msg;
-		
-		if($('#me-'+user).html() == user){
-		    message = '<i><font style="color:#b2f3f7">' + msg + '</font></i>';
-		}
-		
-		return '<div id=' + user + utc + 
-		    ' style="opacity:0.1;" class="message">' +
-		    '<div class="message-header">' +
-		    '<div class="message-user" style="color: ' + color + '">' + user + '</div>' + 
-		    '<div class="message-time">' + timestamp + '</div>' +
-		    '</div><div class="message-content">'+ message + '</div></div>';
-	    }
-	    */
 	}
     });
     
@@ -445,29 +464,7 @@ $(function(){
 	}
     });
     */
-    $('#input-msg').keydown(function(event){	
-	let history = JSON.parse(localStorage.getItem("history"));
-	let count = parseInt(localStorage.getItem("history_count"));
-	
-	if(event.keyCode  == 27){
-	    event.preventDefault();
-	    $('#input-msg').val('');
-	    
-	}else if(event.keyCode == 38){
-	    //up arrow
-	}else if(event.keyCode == 40){
-	    //down arrow
-	}else if(event.keyCode == 13){
-	    let msg = $('#input-msg').val();
-	    
-	    if(msg != ''){
-		//just a joke for now because I'm going crazy, need some fun
-		responsiveVoice.speak(msg);
-	    }
-
-	    $('#input-msg').val('');
-	}
-    });
+    
     /*
     
     $('#submit-message').click(function(){

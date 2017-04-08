@@ -7,6 +7,12 @@ var config = require('./config');
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('babble.db');
 
+//date library
+var moment = require('moment');
+
+//escapes html for message passing
+var escaper = require('escape-html');
+
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var bodyParser = require("body-parser");
@@ -24,13 +30,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
 /*
   user format:
+  indexed by user id (their name - which is unqiue)
   {
       "server": "server_id" //the server that the user is logged into
       "channel": "channel_id" //the channel on that server the user is in
   }
 */
 var users = {};
-var servers = {}; //number of users in server;
+
+/* IMPORTANT */
+//ensure the database is enforcing foreign key restraints
+db.run("PRAGMA foreign_keys = ON;", function(err){});
+
+/* server format:
+   indexed by serverId
+   {
+        "server": socket //the namespace of the server, generated using io.of("/" + serverId)
+	"channels" : [ ["channel name", [ channel users ]] ]
+	"owner" : string name of the owner who owns the cahnnel
+   }
+*/
+var servers = {};
 
 http.listen( port, function () {
     console.log('listening on port', port);
@@ -207,6 +227,7 @@ app.post("/add_channel", function(req, res){
     let server = users[req.session.user].server;
 
     let query = "SELECT user FROM user WHERE server_id = ?";
+    let num_channels = "SELECT COUNT(channel_name) AS channel_count FROM channels WHERE server_id = ?";
     let channels = "SELECT channel_name FROM channels WHERE server_id = ? and channel_name = ?";
 
     db.get(query, server, function(error, row){
@@ -216,27 +237,39 @@ app.post("/add_channel", function(req, res){
 	    if(row && row.user == req.session.user){
 		let goodChannel = false;
 		if(validator.isAlphanumeric(channel)){
-		    db.get(channels, server, channel, function(error, row){
+		    db.get(num_channels, server, function(error, row){
 			if (error){
-			    //something went wrong with query
+			    //handle error
 			}else{
-			    //server does not already have a channel named 'channel'
-			    if (!row){				
-				insertChannel(server, channel);
-				goodChannel = true;
+
+			    //ensure server doesn't already have 10 channels 
+			    if (row.channel_count < 10){
+				 db.get(channels, server, channel, function(error, row){
+				     if (error){
+					 //something went wrong with query
+				     }else{
+					 //server does not already have a channel named 'channel'
+					 if (!row){				
+					     insertChannel(server, channel);
+					     console.log("good channel name: " + channel);
+					     servers[server].server.emit("add_channel", { "channel": channel });
+					 }else{
+					     console.log("A channel with that name already exists on this server.")
+					     res.send({ 'success':false,
+							'message':
+							'That channel already exists.' });
+					 }
+				     }
+				 });				
+			    }else{
+				res.send({ 'success':false,
+					   'message':
+					   'Server already has 10 channels. Delete one first.' });
 			    }
 			}
 		    });
-
-		    if (goodChannel = true){			
-			console.log("good channel name: " + channel);
-			servers[server].server.emit("add_channel", { "channel": channel });
-		    }else{
-			console.log("A channel with that name already exists on this server.")
-			res.send({ 'success':false,
-				   'message':
-				   'Channel name must be alphanumeric (no spaces).' });
-		    }
+		    
+		   		 
 		}else{
 		    console.log("bad channel name: " + channel);
 		    res.send({ 'success':false,
@@ -256,7 +289,10 @@ function insertChannel(serverId, channel){
     db.run(query, serverId, channel, function(error, row){
 	if (error){
 	    console.log('Error inserting channel ' + channel + ' for server ' + server);
-	}	    
+	}else{
+	    //update server state of the server
+	    servers[serverId].channels.push([channel, []]);
+	}
     });
 }
 
@@ -371,6 +407,22 @@ function setupServer(namespace, serverId){
 	    channel: users[user].channel
 	});
 
+	socket.on("channel_text_message", function(data){
+	    let user = this.handshake.session.user;
+	    //for storage in the db
+	    let timestamp = new Date().getTime();
+	    let date = moment(timestamp).format("LLLL");
+	    let msg = escaper(data.message);
+
+	    console.log(msg);
+
+	    namespace.to(users[user].channel).emit('channel_text_message', {
+		'user' : user,
+		'time' : date,
+		'msg' : msg
+	    });
+	});
+
 	socket.on("change_channel", function(data){
 	    let user = this.handshake.session.user;
 	    let server = users[user].server;
@@ -475,7 +527,7 @@ function setupServer(namespace, serverId){
 		    
 		    messages.push({
 			'user': msg_user,
-			'timestamp': msg_time,
+			'timestamp': moment(msg_time).format("LLLL"),
 			'content': msg_content
 		    });
 		}
