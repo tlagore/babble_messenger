@@ -90,8 +90,6 @@ $(function(){
 	    let time = data.time;
 	    let msg = data.msg;
 
-	    console.log(msg);
-
 	    let formatted_msg = generate_message(user, time, msg);
 	    $('#view-messages').prepend(formatted_msg);
 	});
@@ -220,7 +218,7 @@ $(function(){
 
 	    let $contents = $('<div>', {
 		'class' : 'message-content',
-		'text' : msg
+		'html' : msg
 	    });
 
 	    $user.appendTo($header);

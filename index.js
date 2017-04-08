@@ -40,7 +40,9 @@ var users = {};
 
 /* IMPORTANT */
 //ensure the database is enforcing foreign key restraints
-db.run("PRAGMA foreign_keys = ON;", function(err){});
+
+/* temporarily disabling till I can figure out why sqlite is throwing a foreign key mismatch */
+//db.run("PRAGMA foreign_keys = ON;", function(err){});
 
 /* server format:
    indexed by serverId
@@ -325,7 +327,6 @@ app.get("/chat/:serverId", function(req, res){
 		    //set the server on the users session so that the user on to know where to communicate 
 
 		    users[req.session.user].server = serverId;
-		    users[req.session.user].channel = "DefaultChannel";
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
@@ -381,9 +382,17 @@ function setupServer(namespace, serverId){
 	users[socket.handshake.session.user].socket = socket;
 
 	let user = socket.handshake.session.user;
+	let server = users[user].server;
 
-	if (!userInChannel(user, servers[serverId].channels[0])){
+	if (users[user].channel == undefined){// !userInChannel(user, servers[serverId].channels[0])){
+	    users[user].channel = "DefaultChannel";
 	    servers[serverId].channels[0][1].push(user);
+	}else{
+	    //channel should be reset on connection in case they were on another server before
+	    //this one.
+	    users[user].channel = "DefaultChannel";
+	    updateChannelUsers(users[user].server, users[user].channel, "DefaultChannel", user);
+	    console.log(servers[server].channels);
 	}
 		   
 	socket.emit('startup', { 'message': 'user joined',
@@ -414,7 +423,7 @@ function setupServer(namespace, serverId){
 	    let date = moment(timestamp).format("LLLL");
 	    let msg = escaper(data.message);
 
-	    console.log(msg);
+	    saveMessage(users[user].server, users[user].channel, user, timestamp, msg);
 
 	    namespace.to(users[user].channel).emit('channel_text_message', {
 		'user' : user,
@@ -445,7 +454,7 @@ function setupServer(namespace, serverId){
 			    //channel exists
 
 			    updateChannelUsers(server, users[user].channel, data.channel, user);
-					       
+			    
 			    socket.leave(users[user].channel);			
 			    users[user].channel = data.channel;		    
 			    socket.join(users[user].channel);
@@ -464,12 +473,29 @@ function setupServer(namespace, serverId){
 	// setup events for that socket
 	socket.on('disconnect', function(){
 	    let user = this.handshake.session.user;
+
+	    console.log(users[user].channel);
+	    
+	    console.log(servers[users[user].server].channels);
+	    console.log(user + ' left');
 	    namespace.emit('user_left', {
 		'user': user
 	    });
 	});
     });
 
+    function saveMessage(server, channel, user, utc, msg){
+	let query = "INSERT INTO messages (server_id, channel_name, user, timestamp, content) " +
+	    "VALUES (?, ?, ?, ?, ?);";
+	db.run(query, server, channel, user, utc, msg, function(err){
+	    console.log("Error inserting message");
+	    console.log(server + " " + channel + " " + user + " " + utc + " " + msg);
+	    console.log(err);
+	});
+    }
+
+    /* Updates the channel users on server side. If newChannel is null, user disconnected, 
+     simply remove them from new list.*/
     function updateChannelUsers(server, oldChannel, newChannel, user){
 	/*
 	  channels format is 
@@ -477,6 +503,8 @@ function setupServer(namespace, serverId){
           [channel name, [list of users]]
 	  ]
 	*/
+
+	console.log("old channel: " + oldChannel + " new channel " + newChannel);
 	let oChannel = []
 	let nChannel = []
 	
@@ -489,10 +517,13 @@ function setupServer(namespace, serverId){
 	    }
 	}
 
+	console.log (nChannel + " " +  oChannel);
+
 	for(let i = 0; i < oChannel.length; i++){
 	    if(oChannel[i] == user){
 		oChannel.splice(i, 1);
-		nChannel.push(user);
+		if(newChannel != null)
+		    nChannel.push(user);
 		break;
 	    }
 	}
