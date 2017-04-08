@@ -69,7 +69,8 @@ $(function(){
 	
 	server_socket.on('startup', function(data){
 	    //alert(data.message) - a general purpose message from the server
-	    
+
+	    //might be useful for client to know who they are and channel they are in
 	    whoami = data.whoami;
 	    mychannel = data.channels[0][0];
 
@@ -109,14 +110,32 @@ $(function(){
 	});
 
 	function changeChannel(channel){
-	    if (channel.html() != mychannel){
-		server_socket.emit('change_channel', channel.html());
-	    }
+	    server_socket.emit('change_channel', { 'channel': channel.html() });
 	}
 
-	server_socket.on('channel_change', function(data){
-	    user = data.user;
-	    channel = data.channel;
+	server_socket.on('channel_change_successful', function(data){
+	    let user = data.user;
+	    let channel = data.channel;
+	    let messages = data.messages;
+
+	    $('#' + user).insertAfter('#channel-' + channel);
+	    $('#view-messages').empty();
+
+	    for(let i = 0; i < messages.length; i++){
+		let timestamp = messages[i].timestamp;
+		let message_user = messages[i].user;
+		let content = messages[i].content;
+		
+		let message = generate_message(message_user, timestamp, content);
+		message.appendTo('#view-messages');
+	    }
+	});
+
+	server_socket.on('user_changed_channel', function(data){
+	    let user = data.user;
+	    let channel = data.channel;
+
+	    $('#' + user).insertAfter('#channel-' + channel);
 	});
 
 	function formattedChannelUser(user){
@@ -141,8 +160,60 @@ $(function(){
 	    });
 	    
 	    return $div;
-	}	
+	}
+
+	function generate_message(user, timestamp, msg, utc, color){
+	    let $message = $('<div>', {
+		'class' : 'message',		
+	    });
+
+	    let $header = $('<div>', {
+		'class' : 'message-header',
+	    });
+
+	    let $user = $('<div>', {
+		'class' : 'message-user',
+		'text' : user
+	    });
+	    
+	    let $timestamp = $('<div>', {
+		'class' : 'message-time',
+		'text' : timestamp
+	    });
+
+	    let $contents = $('<div>', {
+		'class' : 'message-content',
+		'text' : msg
+	    });
+
+	    $user.appendTo($header);
+	    $timestamp.appendTo($header);
+
+	    $header.appendTo($message);
+	    $contents.appendTo($message);
+
+	    return $message;
+	    /*
+	    if (user == "server"){
+		return server_message(utc, msg, color)
+	    }else{
+		let message = msg;
+		
+		if($('#me-'+user).html() == user){
+		    message = '<i><font style="color:#b2f3f7">' + msg + '</font></i>';
+		}
+		
+		return '<div id=' + user + utc + 
+		    ' style="opacity:0.1;" class="message">' +
+		    '<div class="message-header">' +
+		    '<div class="message-user" style="color: ' + color + '">' + user + '</div>' + 
+		    '<div class="message-time">' + timestamp + '</div>' +
+		    '</div><div class="message-content">'+ message + '</div></div>';
+	    }
+	    */
+	}
     });
+    
 
 
     
@@ -470,7 +541,7 @@ function server_message(utc, msg, color){
     return mesg = '<div id=server' + utc + 
 	' style="opacity:0.1; color:' + color +'" class="message-content">' + msg + '</div>'
 }
-
+/*
 function generate_message(user, timestamp, msg, utc, color){
     if (user == "server"){
 	return server_message(utc, msg, color)
@@ -489,3 +560,4 @@ function generate_message(user, timestamp, msg, utc, color){
 	    '</div><div class="message-content">'+ message + '</div></div>';
     }
 }
+*/

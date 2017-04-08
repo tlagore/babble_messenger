@@ -360,15 +360,53 @@ function setupServer(namespace, serverId){
 	socket.join(users[user].channel);
 
 	//this is how we emit to a specific channel
-	namespace.to(users[user].channel).emit('channel_message');
-	
-	namespace.emit('user_joined', {
+	namespace.to(users[user].channel).emit('channel_message', users[user].channel);
+	//delete this line when we no longer need the example
+
+	updateUserChannelChat(user, users[user].server, users[user].channel, socket);
+
+	//broadcasts to all sockets except 'socket'
+	socket.broadcast.emit('user_joined', {
 	    'user': user,
 	    channel: users[user].channel
 	});
 
 	socket.on("change_channel", function(data){
-	    console.log(user + " wants to change to channel " + data);
+	    let user = this.handshake.session.user;
+	    let server = users[user].server;
+	    let channelQuery = "SELECT channel_name FROM channels WHERE server_id = ? AND " +
+		"channel_name = ?;";
+
+	    console.log(user + " wants to change to channel " + data.channel);
+
+	    let messageQuery = "SELECT user, timestamp, content FROM messages WHERE " +
+		"server_id = ? AND channel_name = ?";
+	    
+	    //ensure user isn't already in that channel
+	    if(users[user].channel != data.channel){
+		//make sure requested channel exists
+		db.get(channelQuery, server, data.channel,function(err, row){
+		    if (err){
+			//handle error
+		    }else{
+			if (row != undefined){
+			    //channel exists
+
+			    updateChannelUsers(server, users[user].channel, data.channel, user);
+					       
+			    socket.leave(users[user].channel);			
+			    users[user].channel = data.channel;		    
+			    socket.join(users[user].channel);
+			    socket.broadcast.emit('user_changed_channel', {
+				'user' : user,
+				'channel' : data.channel
+			    });
+
+			    updateUserChannelChat(user, server, data.channel, socket);
+			}
+		    }
+		});
+	    }	    
 	});
 
 	// setup events for that socket
@@ -379,6 +417,73 @@ function setupServer(namespace, serverId){
 	    });
 	});
     });
+
+    function updateChannelUsers(server, oldChannel, newChannel, user){
+	/*
+	  channels format is 
+	  [  
+          [channel name, [list of users]]
+	  ]
+	*/
+	let oChannel = []
+	let nChannel = []
+	
+	let channels = servers[server].channels;
+	for(let i = 0; i < channels.length; i++){
+	    if(oldChannel == channels[i][0]){
+		oChannel = channels[i][1];
+	    }else if (newChannel == channels[i][0]){
+		nChannel = channels[i][1];
+	    }
+	}
+
+	for(let i = 0; i < oChannel.length; i++){
+	    if(oChannel[i] == user){
+		oChannel.splice(i, 1);
+		nChannel.push(user);
+		break;
+	    }
+	}
+    }
+
+    function updateUserChannelChat(user, server, channel, socket){
+	getMessages(server, channel, function(messages){
+	    //query complete
+	    socket.emit('channel_change_successful', {
+		'user': user,
+		'channel': channel,
+		//need to include messages from the channel they are joining
+		//for client to display
+		'messages' : messages
+	    });
+	});
+    }
+    
+    function getMessages(server, channel, callback){
+	let messageQuery = "SELECT user, timestamp, content FROM messages WHERE " +
+	    "server_id = ? AND channel_name = ?";	
+	
+	let messages = [];
+	db.each(messageQuery, server, channel, function(err, row){
+	    if (err){
+		//handle error
+	    }else{
+		if(row != undefined){
+		    let msg_user = row.user;
+		    let msg_time = row.timestamp;
+		    let msg_content = row.content;
+		    
+		    messages.push({
+			'user': msg_user,
+			'timestamp': msg_time,
+			'content': msg_content
+		    });
+		}
+	    }
+	}, function(){
+	    callback(messages)
+	});
+    }
 
 
     //
