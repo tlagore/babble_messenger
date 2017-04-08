@@ -86,11 +86,26 @@ $(function(){
     });
 
     function formattedChannelUser(channel, user){
-	return '<div class="channel-user" id="' + channel + '-' + user + '">' + user + '</div>';
+	let $div = $('<div>', {
+	    'id': channel + '-' + user,
+	    'class': 'channel-user',
+	    'text': user
+	});
+
+	return $div;
+	//return '<div class="channel-user" id="' + channel + '-' + user + '">' + user + '</div>';
     }
 
     function formattedChannel(channel_name){
-	return '<div class="channel-header" id="channel-' + channel_name + '">' + channel_name + '</div>';
+	let $div = $('<div>',{
+	    'id' : 'channel-' + channel_name,
+	    'class': 'channel-header',
+	    'text': channel_name
+	});
+
+	return $div;
+	
+	//return '<div class="channel-header" id="channel-' + channel_name + '">' + channel_name + '</div>';
     }
 
     

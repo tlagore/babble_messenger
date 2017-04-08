@@ -369,7 +369,7 @@ input[type="submit"]:hover{
 .channel-header{
     cursor: pointer;
     color: white;
-    font-size: calc(14px + 1vw);
+    font-size: calc(14px + .3vw);
 }
 
 .channel-header:hover{
