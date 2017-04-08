@@ -77,7 +77,8 @@ $(function(){
 	server_socket.on("user_joined", function(data){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
-	    $('#channel-' + data.channel).append(formattedChannelUser(data.channel, data.user));
+	    formattedChannelUser(data.channel, data.user).insertAfter($('#channel-' + data.channel));
+	    //$('#channel-' + data.channel).append(formattedChannelUser(data.channel, data.user));
 	});
 
 	server_socket.on("add_channel", function(data){
@@ -93,7 +94,6 @@ $(function(){
 	});
 
 	return $div;
-	//return '<div class="channel-user" id="' + channel + '-' + user + '">' + user + '</div>';
     }
 
     function formattedChannel(channel_name){
@@ -104,8 +104,6 @@ $(function(){
 	});
 
 	return $div;
-	
-	//return '<div class="channel-header" id="channel-' + channel_name + '">' + channel_name + '</div>';
     }
 
     

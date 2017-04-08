@@ -268,7 +268,6 @@ app.get("/chat/:serverId", function(req, res){
     if(req.session.user){
 	console.log(req.session.user + " requested server: " + serverId);
 
-
 	//ensure good server request
 	db.get(server_query, serverId, function(error, row){
 	    if (error){
@@ -289,6 +288,7 @@ app.get("/chat/:serverId", function(req, res){
 			console.log('new server, settings up namespace');
 			servers[serverId].server = io.of("/" + serverId);
 			servers[serverId].owner = row.user;
+			
 			setupServer(servers[serverId].server, serverId);
 		    }
 		    
@@ -313,19 +313,21 @@ function setupServer(namespace, serverId){
 
 	users[socket.handshake.session.user].socket = socket;
 
-	let channels = []
+	servers[serverId].channels = [];
 	db.all(channel_query, serverId, function(error, rows){
 	    if (error){
 	    }else{
 		if (rows != undefined){
+		    console.log("Servers channels: ");
+		    console.log(rows);
 		    for (let i = 0; i < rows.length; i++){
-			channels.push(rows[i].channel_name);
+			servers[serverId].channels.push(rows[i].channel_name);
 		    }
 		    
 		    let user = socket.handshake.session.user;
 
 		    socket.emit('startup', { 'message': 'user joined',
-					     'channels': channels,
+					     'channels': servers[serverId].channels,
 					   });
 
 
