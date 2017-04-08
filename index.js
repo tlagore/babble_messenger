@@ -337,8 +337,8 @@ function setupServer(namespace, serverId){
 
 		    socket.emit('startup', { 'message': 'user joined',
 					     'channels': servers[serverId].channels,
+					     'whoami' : socket.handshake.session.user
 					   });
-
 
 		    namespace.emit('user_joined', {
 			'user': user,

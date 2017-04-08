@@ -60,7 +60,7 @@ $(function(){
 /* Generic startup stuff */
 $(function(){
     var socket = io();
-
+    var whoami = "";
     socket.on("join_server", function(data){
 
 	$('#server-name').html(data.owner + "'s server");
@@ -69,6 +69,8 @@ $(function(){
 	server_socket.on('startup', function(data){
 	    //alert(data.message) - a general purpose message from the server
 
+	    whoami = data.whoami;
+	    
 	    for(let i = data.channels.length - 1; i >= 0; i--){
 		$('#channel-wrapper').prepend(formattedChannel(data.channels[i]));
 	    }	   
@@ -78,7 +80,9 @@ $(function(){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
 	    formattedChannelUser(data.channel, data.user).insertAfter($('#channel-' + data.channel));
-	    responsiveVoice.speak(data.user + " has joined the server.");
+
+	    if (data.user != whoami)
+		responsiveVoice.speak(data.user + " has joined the server.");
 
 	    //Use this to see a list of possible voice types
 	    //alert(JSON.stringify(responsiveVoice.getVoices()));
