@@ -78,7 +78,10 @@ $(function(){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
 	    formattedChannelUser(data.channel, data.user).insertAfter($('#channel-' + data.channel));
-	    //$('#channel-' + data.channel).append(formattedChannelUser(data.channel, data.user));
+	    responsiveVoice.speak(data.user + " has joined the server.");
+
+	    //Use this to see a list of possible voice types
+	    //alert(JSON.stringify(responsiveVoice.getVoices()));
 	});
 
 	server_socket.on("add_channel", function(data){
