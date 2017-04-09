@@ -547,7 +547,7 @@ function setupServer(namespace, serverId){
     
     function getMessages(server, channel, callback){
 	let messageQuery = "SELECT user, timestamp, content FROM messages WHERE " +
-	    "server_id = ? AND channel_name = ?";	
+	    "server_id = ? AND channel_name = ? ORDER BY timestamp DESC";	
 	
 	let messages = [];
 	db.each(messageQuery, server, channel, function(err, row){

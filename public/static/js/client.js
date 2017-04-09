@@ -73,7 +73,8 @@ $(function(){
 	    //might be useful for client to know who they are and channel they are in
 	    whoami = data.whoami;
 	    mychannel = data.channels[0][0];
-	    $('#channel-wrapper').empty();
+	    $('.channel').remove();
+	    $('.channel-user').remove();
 	   
 	    console.log(data.channels[0][1].join());
 	    

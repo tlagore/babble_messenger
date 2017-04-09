@@ -382,6 +382,12 @@ input[type="submit"]:hover{
     margin-left: 10%;
 }
 
+.channel-user:hover{
+    background: #c8ced1;
+    color: black;
+    cursor: pointer;
+}
+
 
 
 /*************** end channel jazz **********/
@@ -406,11 +412,11 @@ input[type="submit"]:hover{
     }
 
     .channel-user{
-	font-size: calc(8px + .8vw);
+	font-size: calc(8px + .6vw + .6vh);
     }
 
     .channel-header{
-	font-size: calc(8px + 1vw);
+	font-size: calc(8px + .5vw + .5vh);
     }
 
     .channel-header-main{
@@ -418,7 +424,7 @@ input[type="submit"]:hover{
     }
 }
 
-@media screen and (min-width: 1000px){
+@media screen and (min-width: 1468px){
     .channel-wrapper{
 	width: 15%;
     }
@@ -485,12 +491,12 @@ input[type="submit"]:hover{
 
 .message-user{
     display: flex;
-    font-size: calc(12px + .4vw);
+    font-size: calc(12px + .4vw + .4vh);
     color: #00ace6;
 }
 
 .message-time{
-    font-size: calc(12px + .3vw);
+    font-size: calc(12px + .3vw + .3vh);
     padding-left: 1%;
     color: #007399;
     bottom: 0;
@@ -498,13 +504,13 @@ input[type="submit"]:hover{
 
 .message-content{
     color: white;
-    font-size: calc(12px + .3vw);
+    font-size: calc(12px + .3vw + .3vh);
     flex-shrink: 0;
 }
 
 .header-main{
     font-weight: bold;
-    font-size: calc(15px + .3vw);
+    font-size: calc(15px + .3vw + .3vh);
     color: white;
     width: 75%;
     /*color: #32a2f7;*/
