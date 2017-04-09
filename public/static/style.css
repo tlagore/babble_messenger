@@ -369,7 +369,7 @@ input[type="submit"]:hover{
 .channel-header{
     cursor: pointer;
     color: white;
-    font-size: calc(14px + .3vw);
+    font-size: calc(14px + .5vw + .5vh);
 }
 
 .channel-header:hover{
@@ -378,7 +378,7 @@ input[type="submit"]:hover{
 
 .channel-user{
     color: #007399;
-    font-size: calc(14px + .8vw);
+    font-size: calc(14px + .4vw  + .4vh);
     margin-left: 10%;
 }
 
@@ -412,16 +412,13 @@ input[type="submit"]:hover{
     }
 
     .channel-user{
-	font-size: calc(8px + .6vw + .6vh);
+	font-size: calc(10px + .4vw + .4vh);
     }
 
     .channel-header{
-	font-size: calc(8px + .5vw + .5vh);
+	font-size: calc(10px + .5vw + .5vh);
     }
 
-    .channel-header-main{
-	font-size: calc(9px + 1vw);
-    }
 }
 
 @media screen and (min-width: 1468px){

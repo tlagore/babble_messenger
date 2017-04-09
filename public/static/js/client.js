@@ -189,6 +189,26 @@ $(function(){
 		'class': 'channel-user',
 		'text': user
 	    });
+	    /*
+	    $div.click(function(){
+		let pos = $(this).position();
+		let width = $(this).outerWidth();
+		let box = $('<div>',{
+		    position: "absolute",
+		    top: pos.top + "px",
+		    left: (width + pos.left) + "px",
+		    width: "100%",
+		    height: "200px",
+		    text: "A generated div",
+		    css: {
+			"background-color":"#404040",
+			"color":"white"
+		    }
+		});
+
+		box.insertAfter($(this));
+	    });
+	    */
 
 	    if (color != undefined && color != null){
 		$div.css('color', color);
@@ -245,9 +265,6 @@ $(function(){
 	}
     });
     
-
-
-    
     $("#sens_slider").slider({
         orientation: "horizontal",
         range: false,
@@ -302,7 +319,7 @@ $(function(){
 		success: function(data){
 		    //ajax call returned successfully
 		    if(data.success){
-
+			
 		    }else{
 			alert(data.message);
 		    }
