@@ -310,10 +310,12 @@ function insertChannel(serverId, channel){
 app.get("/chat/:serverId", function(req, res){
     let serverId = req.params.serverId;
     let server_query = "SELECT server_id, user FROM user WHERE server_id = ?";
+    let user = req.session.user;
 
+    console.log ('get  ....');
     //if user is logged in...
-    if(req.session.user){
-	console.log(req.session.user + " requested server: " + serverId);
+    if(user){
+	console.log(user + " requested server: " + serverId);
 
 	//ensure good server request
 	db.get(server_query, serverId, function(error, row){
@@ -323,10 +325,21 @@ app.get("/chat/:serverId", function(req, res){
 		if (row == undefined){
 		    res.status(404).send("Chat server not found.");
 		}else{
-		    console.log(req.session.user +  " joined server " + serverId);
+		    console.log(user +  " joined server " + serverId);
 		    //set the server on the users session so that the user on to know where to communicate 
 
-		    users[req.session.user].server = serverId;
+		    //if they were on a server previously, remove them from that channel
+
+		    console.log(users[user].channel);
+		    if(users[user].channel != undefined){
+			updateChannelUsers(users[user].server, users[user].channel, null, user);
+			users[user].channel = undefined;
+			console.log("went in here :::: ");
+			console.log(servers[users[user].server].channels);
+		    }
+
+		    
+		    users[user].server = serverId;
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
@@ -349,6 +362,46 @@ app.get("/chat/:serverId", function(req, res){
 });
 
 
+/* Updates the channel users on server side. If newChannel is null, user disconnected, 
+   simply remove them from new list.*/
+function updateChannelUsers(server, oldChannel, newChannel, user){
+    /*
+      channels format is 
+      [  
+      [channel name, [list of users]]
+      ]
+    */
+
+    //console.log ("in updateChannelUsers, server channels BEFORE = ");
+    //console.log(servers[server].channels);
+    //console.log (" ---------------------------------------");
+    let oChannel = []
+    let nChannel = []
+    
+    let channels = servers[server].channels;
+    for(let i = 0; i < channels.length; i++){
+	if(oldChannel == channels[i][0]){
+	    oChannel = channels[i][1];
+	}else if (newChannel == channels[i][0]){
+	    nChannel = channels[i][1];
+	}
+    }
+
+    for(let i = 0; i < oChannel.length; i++){
+	if(oChannel[i] == user){
+	    oChannel.splice(i, 1);
+	    if(newChannel != null)
+		nChannel.push(user);
+	    break;
+	}
+    }
+
+    //console.log ("in updateChannelUsers, server channels = ");
+    //console.log(servers[server].channels);
+    //console.log (" ---------------------------------------");
+}
+
+
 
 function setupServer(namespace, serverId){
     namespace.use(sharedsession(sessions));
@@ -366,8 +419,6 @@ function setupServer(namespace, serverId){
 	if (error){
 	}else{
 	    if (rows != undefined){
-		console.log("Servers channels: ");
-		console.log(rows);
 		for (let i = 0; i < rows.length; i++){
 		    //channels holds a tuple [channel_name, [list of users]]
 		    let channel = rows[i].channel_name
@@ -378,23 +429,13 @@ function setupServer(namespace, serverId){
     });
     
     namespace.on('connection', function(socket){
-	console.log('got connection on namespace: ' + serverId);
 	users[socket.handshake.session.user].socket = socket;
 
 	let user = socket.handshake.session.user;
-	let server = users[user].server;
+	
+	users[user].channel = "DefaultChannel";
+	servers[serverId].channels[0][1].push(user);
 
-	if (users[user].channel == undefined){// !userInChannel(user, servers[serverId].channels[0])){
-	    users[user].channel = "DefaultChannel";
-	    servers[serverId].channels[0][1].push(user);
-	}else{
-	    //channel should be reset on connection in case they were on another server before
-	    //this one.
-	    users[user].channel = "DefaultChannel";
-	    updateChannelUsers(users[user].server, users[user].channel, "DefaultChannel", user);
-	    console.log(servers[server].channels);
-	}
-		   
 	socket.emit('startup', { 'message': 'user joined',
 				 'channels': servers[serverId].channels,
 				 'whoami' : socket.handshake.session.user,
@@ -403,10 +444,6 @@ function setupServer(namespace, serverId){
 
 	//join the user to DefaultChannel.
 	socket.join(users[user].channel);
-
-	//this is how we emit to a specific channel
-	namespace.to(users[user].channel).emit('channel_message', users[user].channel);
-	//delete this line when we no longer need the example
 
 	updateUserChannelChat(user, users[user].server, users[user].channel, socket);
 
@@ -474,9 +511,9 @@ function setupServer(namespace, serverId){
 	socket.on('disconnect', function(){
 	    let user = this.handshake.session.user;
 
-	    console.log(users[user].channel);
+	    //updateChannelUsers(users[user].server, users[user].channel, null, user);    	   
+	    //users[user].server = undefined;
 	    
-	    console.log(servers[users[user].server].channels);
 	    console.log(user + ' left');
 	    namespace.emit('user_left', {
 		'user': user
@@ -494,40 +531,6 @@ function setupServer(namespace, serverId){
 	});
     }
 
-    /* Updates the channel users on server side. If newChannel is null, user disconnected, 
-     simply remove them from new list.*/
-    function updateChannelUsers(server, oldChannel, newChannel, user){
-	/*
-	  channels format is 
-	  [  
-          [channel name, [list of users]]
-	  ]
-	*/
-
-	console.log("old channel: " + oldChannel + " new channel " + newChannel);
-	let oChannel = []
-	let nChannel = []
-	
-	let channels = servers[server].channels;
-	for(let i = 0; i < channels.length; i++){
-	    if(oldChannel == channels[i][0]){
-		oChannel = channels[i][1];
-	    }else if (newChannel == channels[i][0]){
-		nChannel = channels[i][1];
-	    }
-	}
-
-	console.log (nChannel + " " +  oChannel);
-
-	for(let i = 0; i < oChannel.length; i++){
-	    if(oChannel[i] == user){
-		oChannel.splice(i, 1);
-		if(newChannel != null)
-		    nChannel.push(user);
-		break;
-	    }
-	}
-    }
 
     function updateUserChannelChat(user, server, channel, socket){
 	getMessages(server, channel, function(messages){

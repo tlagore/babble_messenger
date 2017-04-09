@@ -74,13 +74,22 @@ $(function(){
 	    whoami = data.whoami;
 	    mychannel = data.channels[0][0];
 	    $('#channel-wrapper').empty();
-
+	   
+	    console.log(data.channels[0][1].join());
+	    
 	    for(let i = data.channels.length - 1; i >= 0; i--){
 		let channel = formattedChannel(data.channels[i][0]);
 		$('#channel-wrapper').prepend(channel);
+		
 		for(let j = 0; j < data.channels[i][1].length; j++){
-		    let user = formattedChannelUser(data.channels[i][1][j]);
-		    user.insertAfter(channel);
+		    let color = undefined;
+
+		    if (data.channels[i][1][j] == whoami){
+			color = '#00c7e6';
+		    }
+		    //user = formattedChannelUser(data.channels[i][1][j], color);
+
+		    formattedChannelUser(data.channels[i][1][j], color).insertAfter(channel);
 		}
 	    }
 	});
@@ -173,12 +182,16 @@ $(function(){
 	    }
 	});
 
-	function formattedChannelUser(user){
+	function formattedChannelUser(user, color){
 	    let $div = $('<div>', {
 		'id': user,
 		'class': 'channel-user',
 		'text': user
 	    });
+
+	    if (color != undefined && color != null){
+		$div.css('color', color);
+	    }
 	    
 	    return $div;
 	}
@@ -207,7 +220,7 @@ $(function(){
 	    });
 
 	    let $user = $('<div>', {
-		'class' : 'message-user',
+		'class' : 'message-user',		
 		'text' : user
 	    });
 	    
