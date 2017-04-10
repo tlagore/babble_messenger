@@ -484,6 +484,7 @@ input[type="submit"]:hover{
 
 .message-header{
     display: flex;
+    width: 100%;
 }
 
 .message-user{
@@ -495,6 +496,7 @@ input[type="submit"]:hover{
 .message-time{
     font-size: calc(12px + .3vw + .3vh);
     padding-left: 1%;
+    width: 80%;
     color: #007399;
     bottom: 0;
 }
@@ -531,12 +533,116 @@ input[type="submit"]:hover{
     height: 50%;
 }
 
+/*******************************************/
+/*                   private messages ******/
+/*******************************************/
+
 .private-messages{
+    display: flex;
+
+    flex-direction: row;
+    position: absolute;
+    top: 40%;
+    left: 10%;
+    width: 89%;
+    height: 50.5%;
+    color: #8c8c8c;
+
+    border-style: solid;
+    border-width: 1px;
+}
+
+@media screen and (min-width: 640px){
+    .private-messages{
+	left: 40%;
+	width: 59%;
+    }
+}
+
+.private-message-users{
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    width: 35%;
+    background-color: #333333;
+
+    border-color: LightGray;
+    border-right: solid;
+    border-width: 1px;
+}
+
+.private-message-user{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 5%;
+    color: #00ace6;
+    background-color: #333333;
+    font-size: calc(12px + .2vw + .2vh);
+
+    border-style: dashed;
+    border-width: 0px 0px 1px 0px;
+    /*border-bottom: solid;
+    border-width: 2px;*/
+}
+
+.private-message-users .private-message-user:hover{
+    background-color: black;
+    color: white;
+    cursor: pointer;
+}
+
+.private-message-messages{
+    display: flex;
+    flex-direction: column-reverse;
+    background-color: #333333;
+    height: 85%;
+}
+
+.private-message-send-message{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 10%;
+}
+
+.private-messages-wrapper{
+    position: relative;
+    display: flex;
+    width: 65%;
+    flex-direction: column;
+    background-color: gray;
+}
+
+.private-message-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 25%;
     height: 50%;
     border-width: 1px;
     border-style: solid;
+    color: white;
 }
+
+.pm-main-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.pm-main-header:hover{
+    background-color: black;
+    cursor: pointer;
+}
+
+
+/****************************************************/
+/***********     end private messages            ****/
+/****************************************************/
 
 #register_user{
    /* background: url(glyphicons/glyphicons-541-hourglass.png);*/
@@ -569,7 +675,8 @@ input[type="text"]:focus, input[type="password"]:focus{
 			      box-shadow: 0 0 5px;
 			  }
 
-.message-input > input[type="text"]{
+.message-input > input[type="text"],
+.private-message-send-message > input[type="text"]{
     background: url(/static/glyphicons/glyphicons-11-envelope.png);
     background-repeat: no-repeat;
     background-position: 99% 50%;

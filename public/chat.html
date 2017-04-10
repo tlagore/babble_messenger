@@ -47,7 +47,7 @@
       
       <div class="content-container">
 	<div class="channel-wrapper" id="channel-wrapper">
-	  <div class="bottom-flex">
+	  <div class="bottom-flex" id="channels-end">
 	    <input id="add-channel" type="submit" value="Add Channel">
 	  </div>	    
 	</div>
@@ -63,8 +63,20 @@
 	    <div class="message-input">
 	      <input id="input-msg" type="text" placeholder="Message">
 	    </div>
-	    <div class="private-messages">
-	      Pms will go here
+	    <div class="private-message-container">
+	      <div class="pm-main-header">Private Messages</div>
+	      <div class="private-messages">
+		<div class="private-message-users">
+		  <div class="private-message-user">User1</div>		    
+		</div>
+		<div class="private-messages-wrapper">
+		  <div class="private-message-user">User 1</div>		  
+		  <div class="private-message-messages" id="user-pms"></div>
+		  <div class="private-message-send-message">
+		    <input type="text" placeholder="Message"></div>
+		  </div>
+		</div>
+	      </div>
 	    </div>
 	  </div>
 	</div>
@@ -88,3 +100,6 @@
     
   </body>
 </html>
+
+
+

@@ -42,7 +42,7 @@ var users = {};
 //ensure the database is enforcing foreign key restraints
 
 /* temporarily disabling till I can figure out why sqlite is throwing a foreign key mismatch */
-//db.run("PRAGMA foreign_keys = ON;", function(err){});
+db.run("PRAGMA foreign_keys = ON;", function(err){});
 
 /* server format:
    indexed by serverId
@@ -286,7 +286,7 @@ app.post("/add_channel", function(req, res){
     });
 });
 
-function insertChannel(serverId, channel){
+function insertChannel(serverIdo, channel){
     let query = "INSERT INTO channels (server_id, channel_name) VALUES (?, ?);";
     db.run(query, serverId, channel, function(error, row){
 	if (error){
@@ -457,7 +457,7 @@ function setupServer(namespace, serverId){
 	    let user = this.handshake.session.user;
 	    //for storage in the db
 	    let timestamp = new Date().getTime();
-	    let date = moment(timestamp).format("LLLL");
+	    let date = moment(timestamp).calendar();//format("LLLL");
 	    let msg = escaper(data.message);
 
 	    saveMessage(users[user].server, users[user].channel, user, timestamp, msg);
@@ -558,10 +558,9 @@ function setupServer(namespace, serverId){
 		    let msg_user = row.user;
 		    let msg_time = row.timestamp;
 		    let msg_content = row.content;
-		    
 		    messages.push({
 			'user': msg_user,
-			'timestamp': moment(msg_time).format("LLLL"),
+			'timestamp': moment(msg_time).calendar(),//format("LLLL"),
 			'content': msg_content
 		    });
 		}

@@ -59,6 +59,10 @@ $(function(){
 
 /* Setup our socket to handle events */
 $(function(){
+
+    //let message = generate_message("User 1", new Date().toUTCString(), "huehuheuehue");
+    $('#user-pms').prepend(generate_message("User 1", new Date().toUTCString(), "huehuheuheu"));
+    
     var socket = io();
     var whoami = "";
     var mychannel = "";
@@ -126,7 +130,7 @@ $(function(){
 	});
 
 	server_socket.on("add_channel", function(data){
-	    formattedChannel(data.channel).insertAfter($('.channel-header').last());
+	    formattedChannel(data.channel).insertBefore($('#channels-end'));
 	});
 
 	function changeChannel(channel){
@@ -231,39 +235,41 @@ $(function(){
 	    return $div;
 	}
 
-	function generate_message(user, timestamp, msg){
-	    let $message = $('<div>', {
-		'class' : 'message',		
-	    });
-
-	    let $header = $('<div>', {
-		'class' : 'message-header',
-	    });
-
-	    let $user = $('<div>', {
-		'class' : 'message-user',		
-		'text' : user
-	    });
-	    
-	    let $timestamp = $('<div>', {
-		'class' : 'message-time',
-		'text' : timestamp
-	    });
-
-	    let $contents = $('<div>', {
-		'class' : 'message-content',
-		'html' : msg
-	    });
-
-	    $user.appendTo($header);
-	    $timestamp.appendTo($header);
-
-	    $header.appendTo($message);
-	    $contents.appendTo($message);
-
-	    return $message;
-	}
+	
     });
+
+    function generate_message(user, timestamp, msg){
+	let $message = $('<div>', {
+	    'class' : 'message',		
+	});
+
+	let $header = $('<div>', {
+	    'class' : 'message-header',
+	});
+
+	let $user = $('<div>', {
+	    'class' : 'message-user',		
+	    'text' : user
+	});
+	
+	let $timestamp = $('<div>', {
+	    'class' : 'message-time',
+	    'text' : timestamp
+	});
+
+	let $contents = $('<div>', {
+	    'class' : 'message-content',
+	    'html' : msg
+	});
+
+	$user.appendTo($header);
+	$timestamp.appendTo($header);
+
+	$header.appendTo($message);
+	$contents.appendTo($message);
+
+	return $message;
+    }
     
     $("#sens_slider").slider({
         orientation: "horizontal",
@@ -307,7 +313,7 @@ $(function(){
     });
 
     $('#add-channel').click(function(){
-	var channelName = prompt("Please enter a channel name");
+	let channelName = prompt("Please enter a channel name");
 	
 	if(channelName != null){
 	    $.ajax({
@@ -317,10 +323,8 @@ $(function(){
 		},
 		type: 'POST', //can change method type
 		success: function(data){
-		    //ajax call returned successfully
-		    if(data.success){
-			
-		    }else{
+		    //ajax was successful, but server is 
+		    if(!data.success){
 			alert(data.message);
 		    }
 		},
