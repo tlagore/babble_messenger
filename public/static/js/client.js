@@ -194,6 +194,7 @@ $(function(){
 		'text': user
 	    });
 	    /*
+	      idea for individual user settings - kinda bad idea but doable
 	    $div.click(function(){
 		let pos = $(this).position();
 		let width = $(this).outerWidth();
@@ -233,9 +234,7 @@ $(function(){
 	    });
 	    
 	    return $div;
-	}
-
-	
+	}	
     });
 
     function generate_message(user, timestamp, msg){
@@ -270,6 +269,15 @@ $(function(){
 
 	return $message;
     }
+
+    $('#pm-toggle').click(function(){
+	let pms = $('#private-messages');
+	if(pms.css('visibility') == "visible"){
+	    pms.css('visibility', 'hidden');
+	}else{
+	    pms.css('visibility', 'visible');
+	}	   
+    });
     
     $("#sens_slider").slider({
         orientation: "horizontal",

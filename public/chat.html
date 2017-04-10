@@ -64,13 +64,17 @@
 	      <input id="input-msg" type="text" placeholder="Message">
 	    </div>
 	    <div class="private-message-container">
-	      <div class="pm-main-header">Private Messages</div>
-	      <div class="private-messages">
+	      <div class="pm-main-header" id="pm-toggle">PMs</div>
+	      <div class="private-messages" id="private-messages">
 		<div class="private-message-users">
-		  <div class="private-message-user">User1</div>		    
+		  <div class="private-message-user">User1</div>
+		  <div class="private-message-user">User2</div>		    
 		</div>
 		<div class="private-messages-wrapper">
-		  <div class="private-message-user">User 1</div>		  
+		  <div class="private-message-user">
+		    <div id="pm-cur-user">Select a conversation from the left</div>
+		    <div>x</div>
+		  </div>
 		  <div class="private-message-messages" id="user-pms"></div>
 		  <div class="private-message-send-message">
 		    <input type="text" placeholder="Message"></div>
