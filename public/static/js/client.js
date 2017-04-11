@@ -59,7 +59,9 @@ $(function(){
 
 /* Setup our socket to handle events */
 $(function(){
-
+    $(window).click(function(){
+	$('#menu-item').remove();
+    });
     //let message = generate_message("User 1", new Date().toUTCString(), "huehuheuehue");
     $('#user-pms').prepend(generate_message("User 1", new Date().toUTCString(), "huehuheuheu"));
     
@@ -132,6 +134,15 @@ $(function(){
 	server_socket.on("add_channel", function(data){
 	    formattedChannel(data.channel).insertBefore($('#channels-end'));
 	});
+
+	server_socket.on("display_error", function(data){
+	    console.log('in here');
+	    let error = data.error;
+	    let msg = data.msg;
+	    displayMessage(error, msg);
+	});
+
+	
 
 	function changeChannel(channel){
 	    server_socket.emit('change_channel', { 'channel': channel.html() });
@@ -221,6 +232,68 @@ $(function(){
 	    
 	    return $div;
 	}
+
+	function generateChannelMenu(div, channel_name){
+	    div.click(function(e){
+		e.preventDefault();
+	    });
+
+	    function event(e){
+		$('#menu-item').remove();
+		var x = e.pageX + 'px';
+		var y = e.pageY + 'px';
+		var menuItem = $('<div>', {
+		    'id': 'menu-item',
+		    'class': 'menu-item'
+		}).css({
+		    'left': x,
+		    'top': y		    
+		});
+
+		var header = $('<div>', {
+		    'class': 'generic-header',
+		    'text': channel_name
+		});
+
+		var button = $('<div>', {
+		    'class': 'menu-item-btn',
+		    'text': 'Delete Channel'
+		});
+		
+		button.click(function(){		    
+		    server_socket.emit('delete_channel', {'channel': channel_name});
+		});
+
+		menuItem.append(header);
+		menuItem.append(button);
+			       
+		$(document.body).append(menuItem);        
+
+		//stop right click menu from showing up
+		e.preventDefault();
+	    }
+
+	    //android support
+	    function longPress(div){
+		var pressTimer;
+		
+		div.on('mousedown', function(e){
+		    pressTimer = window.setTimeout(function(){
+			event(e);
+		    }, 1000);
+		});
+		
+		div.on('mouseup', function(e){
+		    clearTimeout(pressTimer);
+		});
+	    }
+
+	    if (isMobile()){
+		longPress(div);		
+	    }else{
+		div.contextmenu(event);
+	    }
+	}
 	
 	function formattedChannel(channel_name){
 	    let $div = $('<div>',{
@@ -228,6 +301,9 @@ $(function(){
 		'class': 'channel-header',
 		'text': channel_name
 	    });
+
+	    generateChannelMenu($div, channel_name);
+	    
 	    
 	    $div.on('click', function(){
 		changeChannel($div);
@@ -236,6 +312,45 @@ $(function(){
 	    return $div;
 	}	
     });
+
+    function displayMessage(header, msg){
+	$overlay = $('<div>', {
+	    'class': 'notification-overlay',
+	    'id': 'notification-overlay'
+	});
+
+	$overlay.click(function(){
+	    $(this).remove();
+	});	 
+
+	$dialog = $('<div>', {
+	    'class': 'user-dialog',
+	});
+
+	$header = $('<div>', {
+	    'class': 'dialog-header',
+	    'text': header
+	});
+
+	$message = $('<div>', {
+	    'class': 'dialog-message',
+	    'text': msg
+	});
+
+	$okay = $('<input>', {
+	    'type': 'submit',
+	    'value': 'Okay'
+	}).css({
+	    'margin-bottom': '5%'
+	});
+
+	$dialog.append($header);
+	$dialog.append($message);
+	$dialog.append($okay);
+	$overlay.append($dialog);
+	$(document.body).append($overlay);
+	
+    }
 
     function generate_message(user, timestamp, msg){
 	let $message = $('<div>', {
@@ -333,7 +448,7 @@ $(function(){
 		success: function(data){
 		    //ajax was successful, but server is 
 		    if(!data.success){
-			alert(data.message);
+			displayMessage(data.error, data.message);
 		    }
 		},
 		error: function(xhr, status, error){
@@ -356,6 +471,13 @@ $(function(){
     });
 });
 
+function isMobile(){
+    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+	return true;
+    }
+
+    return false;
+}
 
 function showMessage(msg){
     var user_message = $('#user-message');

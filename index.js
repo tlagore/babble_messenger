@@ -169,6 +169,14 @@ app.post("/login", function(req, res){
     });
 });
 
+app.get("/", function(req, res, next){
+    if(req.session.user){
+	res.redirect("/chat/"+ users[req.session.user].server);
+    }else{
+	next();
+    }
+});
+
 //stub for register - try to register user and log in DB.
 app.post("/register", function(req, res){
     let msg = '';
@@ -258,14 +266,16 @@ app.post("/add_channel", function(req, res){
 					 }else{
 					     console.log("A channel with that name already exists on this server.")
 					     res.send({ 'success':false,
+							'error': 'Channel Exits',
 							'message':
-							'That channel already exists.' });
+							'That channel already exists. Channel names must be unique' });
 					 }
 				     }
 				 });				
 			    }else{
 				res.send({ 'success':false,
-					   'message':
+					   'error': 'Too many channels',
+					   'message': 
 					   'Server already has 10 channels. Delete one first.' });
 			    }
 			}
@@ -275,18 +285,20 @@ app.post("/add_channel", function(req, res){
 		}else{
 		    console.log("bad channel name: " + channel);
 		    res.send({ 'success':false,
+			       'error': 'Bad Channel Name',
 			       'message':
 			       'Channel name must be alphanumeric (no spaces).' });
 		}
 	    }else{
 		res.send({ 'success': false,
+			   'error': 'Insufficient Privileges',
 			   'message': "You're not the owner of this server." });
 	    }
 	}
     });
 });
 
-function insertChannel(serverIdo, channel){
+function insertChannel(serverId, channel){
     let query = "INSERT INTO channels (server_id, channel_name) VALUES (?, ?);";
     db.run(query, serverId, channel, function(error, row){
 	if (error){
@@ -467,6 +479,15 @@ function setupServer(namespace, serverId){
 		'time' : date,
 		'msg' : msg
 	    });
+	});
+
+	socket.on("delete_channel", function(data){
+	    let user = this.handshake.session.user;
+	    let channel = data.channel;
+	    let server = users[user].server;
+
+	    this.emit('display_error', { 'error': 'test error', 'msg': 'test message' });
+	    console.log("user: " + user + " on server " + server + " wants to delete channel " + channel);	   
 	});
 
 	socket.on("change_channel", function(data){
