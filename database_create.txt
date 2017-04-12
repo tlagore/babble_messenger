@@ -1,5 +1,7 @@
-CREATE TABLE "user" (user TEXT PRIMARY_KEY, password BINARY(255) NOT NULL, server_id TEXT NOT NULL UNIQUE DEFAULT "XXXXXXXXXXXX");
+CREATE TABLE "user" (user TEXT PRIMARY KEY, password BINARY(255) NOT NULL, server_id TEXT NOT NULL UNIQUE);
 
 CREATE TABLE "channels" (server_id TEXT NOT NULL, channel_name TEXT NOT NULL, FOREIGN KEY(server_id) REFERENCES user(server_id) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT channels_pk PRIMARY KEY (channel_name, server_id));
 
-CREATE TABLE "messages" (server_id TEXT NOT NULL, channel_name TEXT NOT NULL, user TEXT NOT NULL, timestamp INTEGER, content TEXT NOT NULL, FOREIGN KEY(server_id) REFERENCES user(server_id) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY(channel_name) REFERENCES  channels(channel_name) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY(user) REFERENCES user(user) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT messages_pk PRIMARY KEY (server_id, channel_name, user, timestamp));
+CREATE TABLE "messages" (server_id TEXT NOT NULL, channel_name TEXT NOT NULL, user TEXT NOT NULL, timestamp INTEGER, content TEXT NOT NULL, FOREIGN KEY(channel_name, server_id) REFERENCES  channels(channel_name, server_id) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY(user) REFERENCES user(user) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT messages_pk PRIMARY KEY (server_id, channel_name, user, timestamp));
+
+CREATE TABLE private_messages (sender TEXT, receiver TEXT, timestamp INTEGER, message TEXT, CONSTRAINT pm_pk PRIMARY KEY (sender, receiver, timestamp), FOREIGN KEY(sender) REFERENCES user(user) ON DELETE CASCADE ON UPDATE CASCADE, FOREIGN KEY(receiver) REFERENCES user(user) ON DELETE CASCADE ON UPDATE CASCADE);
