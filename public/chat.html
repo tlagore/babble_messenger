@@ -62,20 +62,21 @@
 	      <input id="input-msg" type="text" placeholder="Message">
 	    </div>
 	    <div class="private-message-container">
-	      <div class="pm-main-header" id="pm-toggle">PMs</div>
+	      <div class="pm-main-header" id="pm-toggle">PMs<span id="pm-counter"></span></div>
 	      <div class="private-messages" id="private-messages">
-		<div class="private-message-users">
-		  <div class="private-message-user">User1</div>
-		  <div class="private-message-user">User2</div>		    
+		<div class="private-message-users" id="private-message-users">
+		  <div class="bottom-flex">
+		    <input id="new-pm" type="submit" value="New PM">
+		  </div>
 		</div>
 		<div class="private-messages-wrapper">
 		  <div class="private-message-user">
-		    <div id="pm-cur-user">Select a conversation from the left</div>
-		    <div>x</div>
+		    <div id="pm-cur-user">Select a conversation</div>
+		    <input type="submit" id="exit-pms" value="X">
 		  </div>
 		  <div class="private-message-messages" id="user-pms"></div>
 		  <div class="private-message-send-message">
-		    <input type="text" placeholder="Message"></div>
+		    <input type="text" placeholder="Message" id="pm-send-message"></div>
 		</div>
 	      </div>
 	    </div>

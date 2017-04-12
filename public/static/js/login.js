@@ -52,7 +52,7 @@ $(function(){
 			});
 			
 		}else{
-		    showAuthenticationMessage($('#login_message'), "Invalid user name or password.");
+		    showAuthenticationMessage($('#login_message'), data.message);
 		}
 	    },
 	    error: function(xhr, status, error){
@@ -121,7 +121,7 @@ function checkUser(user){
 	    data: { "user" : $('#register_user').val() },
 	    type: "POST",
 	    success: function(data){
-		if(data.available){
+		if(!data.exists){
 		    $('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-153-check.png)');
 		}else{
 		    $('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-79-warning-sign.png)');

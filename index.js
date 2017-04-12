@@ -12,7 +12,6 @@ var moment = require('moment');
 
 //escapes html for message passing
 var escaper = require('escape-html');
-
 var cookie_parser = require('cookie-parser');
 var socketIoCookieParser = require("socket.io-cookie-parser");
 var bodyParser = require("body-parser");
@@ -129,11 +128,13 @@ app.post("/check_user", function(req, res){
 	if(error){
 	    console.log(error);
 	}else{
-	    if(row == undefined)
-		res.send({ "available": true});
-	    else
-		res.send({"avaialble": false});
-	    console.log(row);
+	    if(row == undefined){
+		res.send({ "exists": false });
+	    }else{
+		let online = users[row.user] != undefined;		
+		res.send({"exists": true,
+			  "online": online });
+	    }
 	}
     });
 });
@@ -141,32 +142,51 @@ app.post("/check_user", function(req, res){
 // login request. Check if user and pass are good.
 app.post("/login", function(req, res){
     let query = "SELECT password, server_id FROM user WHERE user = ?";
-    db.get(query, req.body.login_user, function(error, row){
-	if(error){
-	    console.log(error);
-	}else{
-	    var success = false;
-	    if(row){
-		//verify that hash we had in the database is a match
-		argon2.verify(row.password, req.body.login_password).then(match => {
-		    if(match){
-			console.log("Successful login for " + req.body.login_user);
-			success = true;
-			req.session.user = req.body.login_user;
-			users[req.body.login_user] = { "server": undefined,
-						       "channel": undefined };
-		    }else{
-			console.log("Failed login attempt for " + req.body.login_user);
-		    }
-		    /*res.redirect("/chat/" + row.server_id);*/		    
+    let next = req.query.next;
+
+    console.log(next);
+
+    if(users[req.body.login_user]){
+	res.send({'success': false,
+		  'message': 'That user is already logged in.'});
+    }else{    
+	db.get(query, req.body.login_user, function(error, row){
+	    if(error){
+		console.log(error);
+	    }else{
+		var success = false;
+		var message = "";
+		if(row){
+		    //verify that hash we had in the database is a match
+		    argon2.verify(row.password, req.body.login_password).then(match => {
+			if(match){
+			    console.log("Successful login for " + req.body.login_user);
+			    success = true;
+			    req.session.user = req.body.login_user;
+			    users[req.body.login_user] = { "server": undefined,
+							   "channel": undefined };
+			}else{
+			    console.log("Failed login attempt for " + req.body.login_user);
+			    message = "Invalid user name or password";
+			}
+			/*res.redirect("/chat/" + row.server_id);*/
+
+			if(next){
+			    res.redirect(next);
+			}else{
+			    res.send({ 'success': success,
+				       'server_id': row.server_id,
+				       'message': message });
+			}
+			
+		    });
+		}else
 		    res.send({ 'success': success,
-			       'server_id': row.server_id});
-		    
-		});
-	    }else
-		res.send({ 'success': success });
-	}
-    });
+			       'message': "Invalid user name or password."
+			     });
+	    }
+	});
+    }
 });
 
 app.get("/", function(req, res, next){
@@ -324,7 +344,6 @@ app.get("/chat/:serverId", function(req, res){
     let server_query = "SELECT server_id, user FROM user WHERE server_id = ?";
     let user = req.session.user;
 
-    console.log ('get  ....');
     //if user is logged in...
     if(user){
 	console.log(user + " requested server: " + serverId);
@@ -369,7 +388,7 @@ app.get("/chat/:serverId", function(req, res){
 	});
     }else{
 	//user is not logged in, redirect to login.
-	res.redirect("/");
+	res.redirect("/?next=/chat/" + serverId);
     }
 });
 
@@ -481,14 +500,93 @@ function setupServer(namespace, serverId){
 	    });
 	});
 
+	socket.on('private_message', function(data){
+	    let target = data.target;
+	    let msg = data.msg;
+	    let time = new Date().getTime();
+	    let formatted_time = moment(time).calendar();
+	    let sender = this.handshake.session.user;
+	    let insertQuery = "INSERT INTO private_messages (sender, receiver, timestamp, message) " +
+		" VALUES (?, ?, ?, ?);";
+
+	    //ensure target is logged and not sending a pm to themselves
+	    if(users[target] != undefined && sender != target){
+		db.run(insertQuery, sender, target, time, msg, function(err){
+		    if(err){
+			console.log("Error inserting private message into database");
+		    }
+		});
+		
+		users[target].socket.emit('private_message',{
+		    'sender': sender,
+		    'time' : formatted_time,
+		    'msg' : msg
+		});					
+	    }	    
+	});
+
 	socket.on("delete_channel", function(data){
 	    let user = this.handshake.session.user;
 	    let channel = data.channel;
 	    let server = users[user].server;
+	    let query = "SELECT u.user FROM channels AS c JOIN user AS u ON " +
+		" u.server_id = c.server_id WHERE c.channel_name = ? " +
+		" AND c.server_id = ?;"
 
-	    this.emit('display_error', { 'error': 'test error', 'msg': 'test message' });
-	    console.log("user: " + user + " on server " + server + " wants to delete channel " + channel);	   
+	    let delete_channel = "DELETE FROM channels WHERE channel_name = ? and server_id = ?;";
+
+	    let this_socket = this;
+
+	    console.log("user: " + user + " on server " + server + " wants to delete channel " + channel);
+	    if (channel == "DefaultChannel"){
+		this_socket.emit('display_error', {
+		    'error': 'Protected Channel',
+		    'msg': 'You cannot delete the default channel.' });
+	    }else{
+		db.get(query, channel, server, function(error, row){
+		    if(error || row == undefined){
+			console.log("Error retrieving owner of server, ignoring channel delete command.");
+		    }else{
+			let owner = row.user;
+			if (owner == user){
+			    if(getChannelUsersByName(channel, server).length != 0){
+				this_socket.emit('display_error', {
+				    'error': 'People in channel',
+				    'msg': 'You cannot delete a channel with users in it.' });
+			    }else{
+				db.run(delete_channel, channel, server, function(error){
+				    if (error){
+					console.log("failed to delete channel");
+				    }else{
+					deleteChannelByName(channel, server);
+					this_socket.emit("delete_channel", { 'channel' : channel });					
+				    }
+				});
+			    }
+			}else{
+
+			}
+			//else do nothing - someone is trying to delete someone elses channel
+		    }
+		});
+	    }
 	});
+
+	function deleteChannelByName(channel, server){
+	    for(let i = 0; i < servers[server].channels.length; i++){
+		if(servers[server].channels[i][0] == channel){
+		    servers[server].channels.splice(i, 1);
+		}
+	    }
+	}
+
+	function getChannelUsersByName(channel, server){
+	    let channels = servers[server].channels;
+	    for(let i = 0; i < channels.length; i++){
+		if(channels[i][0] == channel)
+		    return channels[i][1];		   
+	    }
+	}
 
 	socket.on("change_channel", function(data){
 	    let user = this.handshake.session.user;

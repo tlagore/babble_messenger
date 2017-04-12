@@ -62,14 +62,15 @@ $(function(){
     $(window).click(function(){
 	$('#menu-item').remove();
     });
-    //let message = generate_message("User 1", new Date().toUTCString(), "huehuheuehue");
-    $('#user-pms').prepend(generate_message("User 1", new Date().toUTCString(), "huehuheuheu"));
+    
+    //$('#user-pms').prepend(generate_message("User 1", new Date().toUTCString(), "huehuheuheu"));
     
     var socket = io();
     var whoami = "";
+    var owner = "";
     var mychannel = "";
     socket.on("join_server", function(data){
-
+	owner = data.owner;
 	$('#server-name').html(data.owner + "'s server");
 	var server_socket = io("/" + data.server);
 	
@@ -166,11 +167,142 @@ $(function(){
 	    }
 	});
 
+	server_socket.on('delete_channel', function(data){
+	    let channel = data.channel;
+	    $('#channel-'+ channel).remove();
+	});
+
 	server_socket.on('user_changed_channel', function(data){
 	    let user = data.user;
 	    let channel = data.channel;
 
 	    $('#' + user).insertAfter('#channel-' + channel);
+	});
+
+
+	server_socket.on('private_message', function(data){
+	    let sender = data.sender;
+	    let time = data.time;
+	    let msg = data.msg;
+	    let $user;
+
+	    if($('#pm-' + sender).length == 0){
+		$user = createPM(sender);
+	    }else{
+		$user = $('#pm-' + sender);
+	    }
+	    
+	    if(sender != $('#pm-cur-user').html()){
+		animateUser($user);
+		let counterDiv = $('#pm-' + sender + '-counter');
+		if(counterDiv.html() == '0'){
+		    counterDiv.html('1');
+		}else{
+		    let counter = parseInt(counterDiv.html());
+		    counterDiv.html(counter++);
+		}
+	    }else{
+		$message = generate_message(sender, time, msg);
+		$('#user-pms').prepend($message);
+	    }
+
+	    if($('#private-messages').css('display') == 'none'){
+		let counter = parseInt($('#pm-counter').html());
+		if (isNaN(counter)){
+		    $('#pm-counter').html('1');
+		}else{
+		    counter = counter + 1;
+		    $('#pm-counter').html(counter);
+		}
+	    }
+	});
+
+	function animateUser($user){
+	    
+	}
+
+	function createPM(user){
+	    let $user = $('<div>',{
+		'class': 'private-message-user',
+		'id': 'pm-' + user,
+		'html': '<div>' + user + '</div>'
+	    });	    
+
+	    let $msg_counter = $('<div>', {
+		'id': 'pm-' + user + '-counter',
+		'class': 'pm-counter',
+		'html' : '0'
+	    });
+
+	    $user.append($msg_counter);
+
+	    $user.click(function(e){
+		//make click populate pms
+		$('.private-message-users .private-message-user').css('background-color', '#333333');
+		$user.css('background-color', 'black');
+		clearPMWindow();
+		$('#pm-cur-user').html(user);
+		$('#pm-send-message').css('visibility', 'visible');
+		$('#pm-' + user + '-counter').html('');
+	    });
+
+	    $('#private-message-users').prepend($user);
+	    return $user;
+	}
+
+	function clearPMWindow(){
+	    $('#user-pms').empty();
+	}
+
+	$('#exit-pms').click(function(event){
+	    $('#private-messages').css('display', 'none');
+	});
+	
+	$('#new-pm').click(function(event){
+	    let user = prompt("Enter a user's name");
+
+	    if(user == whoami){
+		displayMessage("Invalid Name", "You can't send messages to yourself!");
+	    }else if(user){
+		$.ajax({
+		    url: '/check_user',
+		    data: { "user" : user },
+		    type: "POST",
+		    success: function(data){
+			if(data.exists && data.online){
+			    if($('#pm-' + user).length == 0){
+				let $user = createPM(user);
+				$user.click();
+			    }else
+				$('#pm-' + user).click();
+			}else{
+			    displayMessage("Not Found", "That user is not online.");
+			}
+		    },
+		    error: function(xhr, status, error){
+			//do nothing
+		    }
+		});
+	    }
+	});
+
+	$('#pm-send-message').keydown(function(event){
+	    let target = $('#pm-cur-user').html();
+	    
+	    if(event.keyCode  == 27){
+		event.preventDefault();
+		$(this).val('');
+	    }else if(event.keyCode == 13){		
+		let msg = $(this).val();
+
+		if(msg != ''){
+		    $(this).val('');
+		    server_socket.emit('private_message', {
+			'target': target,
+			'msg': msg});
+		}
+	    }
+
 	});
 
 	$('#input-msg').keydown(function(event){	
@@ -198,39 +330,10 @@ $(function(){
 	    }
 	});
 
-	function formattedChannelUser(user, color){
-	    let $div = $('<div>', {
-		'id': user,
-		'class': 'channel-user',
-		'text': user
+	function generateUserMenu(div, user_name){
+	    div.click(function(e){
+		e.preventDefault();
 	    });
-	    /*
-	      idea for individual user settings - kinda bad idea but doable
-	    $div.click(function(){
-		let pos = $(this).position();
-		let width = $(this).outerWidth();
-		let box = $('<div>',{
-		    position: "absolute",
-		    top: pos.top + "px",
-		    left: (width + pos.left) + "px",
-		    width: "100%",
-		    height: "200px",
-		    text: "A generated div",
-		    css: {
-			"background-color":"#404040",
-			"color":"white"
-		    }
-		});
-
-		box.insertAfter($(this));
-	    });
-	    */
-
-	    if (color != undefined && color != null){
-		$div.css('color', color);
-	    }
-	    
-	    return $div;
 	}
 
 	function generateChannelMenu(div, channel_name){
@@ -294,6 +397,24 @@ $(function(){
 		div.contextmenu(event);
 	    }
 	}
+
+
+	function formattedChannelUser(user, color){
+	    let $div = $('<div>', {
+		'id': user,
+		'class': 'channel-user',
+		'text': user
+	    });
+
+
+	    if (color != undefined && color != null){
+		$div.css('color', color);
+	    }
+	    
+	    return $div;
+	}
+
+
 	
 	function formattedChannel(channel_name){
 	    let $div = $('<div>',{
@@ -302,8 +423,9 @@ $(function(){
 		'text': channel_name
 	    });
 
-	    generateChannelMenu($div, channel_name);
-	    
+	    if(owner == whoami){
+		generateChannelMenu($div, channel_name);
+	    }
 	    
 	    $div.on('click', function(){
 		changeChannel($div);
@@ -387,10 +509,12 @@ $(function(){
 
     $('#pm-toggle').click(function(){
 	let pms = $('#private-messages');
-	if(pms.css('visibility') == "visible"){
-	    pms.css('visibility', 'hidden');
+	let pmCounter = $('#pm-counter');
+	if(pms.css('display') == "flex"){
+	    pms.css('display', 'none');
 	}else{
-	    pms.css('visibility', 'visible');
+	    pms.css('display', 'flex');
+	    pmCounter.html('');
 	}	   
     });
     

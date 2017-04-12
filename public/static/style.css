@@ -500,8 +500,11 @@ input[type="submit"]:hover{
 /*******************************************/
 
 .private-messages{
+    /* Default value */
     display: flex;
-    visibility: hidden;
+
+    /* changed with javascript later */
+    display: none;
     flex-direction: row;
     position: absolute;
     top: 40%;
@@ -535,11 +538,30 @@ input[type="submit"]:hover{
 
 #pm-cur-user{
     width: 80%;
+    text-align: center;
 }
+
+#pm-send-message{
+    visibility: hidden;
+}
+
+#exit-pms{
+    width: 7%;
+    height: 75%;
+}
+
+@media screen and (min-width: 1040px){
+    #exit-pms{
+	height: 85%;
+	width: 5%;
+    }
+
+}
+
 
 .private-message-user{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
     height: 5%;
@@ -551,6 +573,10 @@ input[type="submit"]:hover{
     border-width: 0px 0px 1px 0px;
     /*border-bottom: solid;
     border-width: 2px;*/
+}
+
+.pm-counter{
+    color: red;
 }
 
 .private-message-users .private-message-user:hover{
@@ -571,6 +597,7 @@ input[type="submit"]:hover{
     justify-content: center;
     align-items: center;
     height: 10%;
+    background-color: #333333;
 }
 
 .private-messages-wrapper{
@@ -578,7 +605,6 @@ input[type="submit"]:hover{
     display: flex;
     width: 65%;
     flex-direction: column;
-    background-color: gray;
 }
 
 .private-message-container{
@@ -590,15 +616,20 @@ input[type="submit"]:hover{
     border-width: 1px;
     border-style: solid;
     color: #8c8c8c;
+    background-color: #333333;
 }
 
 .pm-main-header{
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     height: 100%;
     width: 100%;
     color: white;
+}
+
+#pm-counter{
+    color: red;
 }
 
 .pm-main-header:hover{
@@ -613,8 +644,6 @@ input[type="submit"]:hover{
     font-size: calc(12px + .2vw + .2vh);
     color: white;
     text-align: center;
-/*    padding-top: 3%;
-    padding-bottom: 3;*/
     margin-bottom: 3%;
 }
 
@@ -649,6 +678,7 @@ input[type="submit"]:hover{
 }
 
 @media screen and (min-width: 640px){
+    
     .menu-item{
 	width: 35%;
     }
