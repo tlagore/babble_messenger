@@ -190,7 +190,28 @@ $(function(){
 
 	});
 
+	server_socket.on('generate_private_messages', function(data){
+	    let messages = data.messages;
 
+	    for(let i = 0; i < messages.length; i ++){
+		let $msg = generate_message(messages[i].user, messages[i].timestamp, messages[i].content);
+		$('#user-pms').prepend($msg);
+	    }
+	});
+
+	server_socket.on('pm_successful', function(data){
+	    let me = data.sender;
+	    let target = data.target;
+	    let time = data.time;
+	    let msg = data.msg;
+
+	    //make sure current pm window for this pm acknowledgement is active
+	    if(target == $('#pm-cur-user').html()){
+		$message = generate_message(me, time, msg);
+		$('#user-pms').prepend($message);
+	    }
+	});
+	
 	server_socket.on('private_message', function(data){
 	    let sender = data.sender;
 	    let time = data.time;

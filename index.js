@@ -500,6 +500,39 @@ function setupServer(namespace, serverId){
 	    });
 	});
 
+	socket.on('request_pms', function(data){
+	    let target = data.target;
+	    let user = this.handshake.session.user;
+	    let sckt = this;
+	    let query = "SELECT sender, timestamp, message FROM private_messages " +
+		" WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) " +
+		" ORDER BY timestamp DESC; ";
+
+	    console.log(user + " requesting pms with " + target);
+	    let messages = [];
+	    
+	    db.each(query, target, user, user, target, function(err, row){
+		if (err){
+		    //handle error
+		}else{
+		    if(row){
+			let sender = row.sender;
+			let timestamp = row.timestamp;
+			let content = row.message;
+
+			messages.push({
+			    'user': sender,
+			    'timestamp': moment(timestamp).calendar(),//format("LLLL"),
+			    'content': content
+			});
+		    }
+		}
+	    }, function(){
+		//query complete
+		sckt.emit('generate_private_messages', { 'messages' : messages });
+	    });
+	});
+
 	socket.on('private_message', function(data){
 	    let target = data.target;
 	    let msg = data.msg;
@@ -521,7 +554,13 @@ function setupServer(namespace, serverId){
 		    'sender': sender,
 		    'time' : formatted_time,
 		    'msg' : msg
-		});					
+		});
+		this.emit('pm_successful', {
+		    'sender': sender,
+		    'time' : formatted_time,
+		    'target': target,
+		    'msg': msg
+		});
 	    }	    
 	});
 
