@@ -100,12 +100,17 @@ $(function(){
 		    formattedChannelUser(data.channels[i][1][j], color).insertAfter(channel);
 		}
 	    }
+	    $('#channel-' + mychannel).css('color', 'white');
+	    
 	});
 
 	server_socket.on("channel_text_message", function(data){
 	    let user = data.user;
 	    let time = data.time;
 	    let msg = data.msg;
+
+	    //can add a check to see if user has voice to text on
+	    //responsiveVoice.speak(msg);
 
 	    let formatted_msg = generate_message(user, time, msg);
 	    $('#view-messages').prepend(formatted_msg);
@@ -157,6 +162,10 @@ $(function(){
 	    $('#' + user).insertAfter('#channel-' + channel);
 	    $('#view-messages').empty();
 
+	    $('#channel-' + mychannel).css('color', '#a4a6a8');
+	    mychannel = channel;
+	    $('#channel-' + mychannel).css('color', 'White');
+
 	    for(let i = 0; i < messages.length; i++){
 		let timestamp = messages[i].timestamp;
 		let message_user = messages[i].user;
@@ -174,9 +183,11 @@ $(function(){
 
 	server_socket.on('user_changed_channel', function(data){
 	    let user = data.user;
-	    let channel = data.channel;
+	    let channel = data.channel;	    
 
 	    $('#' + user).insertAfter('#channel-' + channel);
+
+
 	});
 
 
@@ -208,7 +219,8 @@ $(function(){
 
 	    if($('#private-messages').css('display') == 'none'){
 		let counter = parseInt($('#pm-counter').html());
-		if (isNaN(counter)){
+
+		if (counter == 0 || isNaN(counter)){
 		    $('#pm-counter').html('1');
 		}else{
 		    counter = counter + 1;
@@ -244,6 +256,7 @@ $(function(){
 		$('#pm-cur-user').html(user);
 		$('#pm-send-message').css('visibility', 'visible');
 		$('#pm-' + user + '-counter').html('');
+		server_socket.emit('request_pms', { 'target' : user });
 	    });
 
 	    $('#private-message-users').prepend($user);
@@ -321,8 +334,7 @@ $(function(){
 		let msg = $('#input-msg').val();
 		
 		if(msg != ''){
-		    //just a joke for now because I'm going crazy, need some fun
-		    responsiveVoice.speak(msg);
+
 		    server_socket.emit("channel_text_message", { 'message' : msg });
 		}
 		
@@ -514,7 +526,7 @@ $(function(){
 	    pms.css('display', 'none');
 	}else{
 	    pms.css('display', 'flex');
-	    pmCounter.html('');
+	    pmCounter.html('0');
 	}	   
     });
     

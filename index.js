@@ -703,24 +703,11 @@ function setupServer(namespace, serverId){
 
 	return userExists;
     }
-    /*
-      db.all(channels, serverId, function(error, rows){
-	if(error){
-	
-	}else{
-	    for (row in rows){
-		let channel = namespace.sockets.in(row.channel_name);
-		//channel.on('leave')
-	    }
-	}
-    });
-    */
 }
 
-
-
-
 app.use(express.static(__dirname + '/public'));
+
+
 /*
 io.of('/').on('connection', function(socket){
     ss(socket).on('write-file', function(stream, data){
@@ -758,117 +745,3 @@ function genSecret(size){
 
     return text;
 }
-       
-	
-// listen to 'chat' messages
-/*io.on('connection', function(socket){
-    let user = socket.request.cookies.user_hash;
-    
-    if(users[user] != undefined){
-	console.log("Known user: " + user);
-    }else{
-	console.log("New user");
-	name = generate_username();
-	users[user] = { 'user_name': name, 'user_color': '#00ace6' };
-    }
-
-    socket.on('disconnect', function(){
-	if (users[user] != undefined){
-	    let message = { 'user': 'server',
-			    'timestamp':new Date().getTime(),
-			    'color': '#e24646',
-			    'contents':users[user].user_name + " has left the server." };
-	    
-	    users[user].connected = false;
-	    
-	    io.emit('chat', message);
-	    io.emit('user_left', users[user].user_name);
-	}		     
-    });
-
-    socket.on('loaded', function(){
-	console.log("loaded");
-	if(users[user] != undefined){
-	    console.log("Known user. " + users[user].user_name + " logged in.");
-	    users[user].connected = true;
-	}else{
-	    console.log("Undefined...");
-	    users[user] = {'name': generate_username(),
-			   'user_color':'#00ace6',
-			   'connected':true};
-	}
-	
-	socket.emit('user_name', { 'user_name': users[user].user_name,
-				   'user_color': users[user].user_color });
-
-
-	for(let message of message_log){
-	    socket.emit('chat', message);
-	}
-
-	for(let key in users){
-	    if(users[key].connected){
-		io.emit('user_joined', {'user_name': users[key].user_name,
-					'user_color': users[key].user_color });
-	    }
-	}
-
-	message = {'user' : 'server',
-		   'timestamp':new Date().getTime(),
-		   'color': '#76d65e',
-		   'contents': users[user].user_name + " has joined the server."};
-
-	io.emit('chat', message);
-
-	message = {'user' : 'server',
-		   'timestamp':new Date().getTime(),
-		   'color': '#e24646',
-		   'contents': 'Type /help to see a list of commands'};
-	
-	socket.emit('chat', message);	    
-    });
-    
-    socket.on('chat', function(msg){
-
-	if(users[user] != undefined){
-	    let date = new Date();
-
-	    // need to get user from here, message could be a command
-
-	    let msg_contents = parse_message(msg, socket, user);
-
-	    let user_name = msg_contents.user
-
-	    console.log(user_name);
-	    user_name = user_name == undefined ? users[user].user_name : user_name;
-	    
-	    let contents = msg_contents.message;
-	    let color = msg_contents.color;
-	    color = color == undefined ? users[user].user_color : color;
-
-	    //did the parse of the message change the user who is sending it
-	    //if not, keep it as the user who sent it - regular message
-
-	    console.log('sending message from ' + user_name);
-	    
-	    let message = { 'user' : user_name,
-			    'timestamp': date.getTime(),
-			    'color': color,
-			    'contents' : contents };
-
-	    console.log('contents: ' + contents);
-	    //if server message, only send to person who sent message, not everyone
-	    if(user_name == 'server'){
-		socket.emit('chat', message);
-	    }else{
-		console.log("Shouldnt be server: " + user);
-		if (message_log.length >= 300){
-		    shift(message_log);
-		}
-		message_log.push(message);
-		io.emit('chat', message);
-	    }
-	}
-    }); 
-
-});*/
