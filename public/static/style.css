@@ -23,9 +23,9 @@ body{
     position: absolute;
     z-index: 3;
     width: 90%;
-    height: 75%;
+    height: 65%;
 
-    top: 12.5%;
+    top: 20%;
     left: 5%;
 
     animation-duration: 0.5s;
@@ -666,9 +666,16 @@ input[type="submit"]:hover{
     margin-top: 3%;
     margin-bottom: 3%;
     font-size: calc(30px + .5vw + .5vh);
-    font-family: 'Cabin', sans-serif;
     font-family: 'Rubik Mono One', sans-serif;
     color: white;
+}
+
+.header-underlay{
+    width: 100%;
+    text-align: center;
+    margin-bottom: 3%;
+    font-size: calc(12px + .5vw + .5vh);
+    font-family: 'Cabin', sans-serif;
 }
 
 .menu-item-btn{
