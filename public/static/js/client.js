@@ -378,7 +378,7 @@ $(function(){
 		$('#menu-item').remove();
 		var x = e.pageX + 'px';
 		var y = e.pageY + 'px';
-		var menuItem = $('<div>', {
+		var $menuItem = $('<div>', {
 		    'id': 'menu-item',
 		    'class': 'menu-item'
 		}).css({
@@ -386,24 +386,35 @@ $(function(){
 		    'top': y		    
 		});
 
-		var header = $('<div>', {
+		var $header = $('<div>', {
 		    'class': 'generic-header',
 		    'text': channel_name
 		});
 
-		var button = $('<div>', {
+		var $delete = $('<div>', {
 		    'class': 'menu-item-btn',
 		    'text': 'Delete Channel'
 		});
 		
-		button.click(function(){		    
+		var $rename = $('<div>', {
+		    'class': 'menu-item-btn',
+		    'text': 'Rename Channel'
+		});
+		
+		$delete.click(function(){		    
 		    server_socket.emit('delete_channel', {'channel': channel_name});
 		});
 
-		menuItem.append(header);
-		menuItem.append(button);
+		$rename.click(function(){
+		    //TODO implement
+		    //renameChannel();
+		});
+
+		$menuItem.append($header);
+		$menuItem.append($rename);
+		$menuItem.append($delete);
 			       
-		$(document.body).append(menuItem);        
+		$(document.body).append($menuItem);        
 
 		//stop right click menu from showing up
 		e.preventDefault();
@@ -530,6 +541,10 @@ $(function(){
 	    'class' : 'message-content',
 	    'html' : msg
 	});
+
+	if (user == whoami){
+	    $user.css('color', '#00e2e6');
+	}
 
 	$user.appendTo($header);
 	$timestamp.appendTo($header);

@@ -146,7 +146,7 @@ app.post("/login", function(req, res){
 
     console.log(next);
 
-    if(users[req.body.login_user]){
+    if(users[req.body.login_user] && users[req.body.login_user].socket.connected){
 	res.send({'success': false,
 		  'message': 'That user is already logged in.'});
     }else{    
@@ -344,6 +344,9 @@ app.get("/chat/:serverId", function(req, res){
     let server_query = "SELECT server_id, user FROM user WHERE server_id = ?";
     let user = req.session.user;
 
+    if(users[user] == undefined){
+	users[user] = {};
+    }
     //if user is logged in...
     if(user){
 	console.log(user + " requested server: " + serverId);
@@ -360,17 +363,16 @@ app.get("/chat/:serverId", function(req, res){
 		    //set the server on the users session so that the user on to know where to communicate 
 
 		    //if they were on a server previously, remove them from that channel
-
+		    
 		    console.log(users[user].channel);
 		    if(users[user].channel != undefined){
 			updateChannelUsers(users[user].server, users[user].channel, null, user);
 			users[user].channel = undefined;
-			console.log("went in here :::: ");
 			console.log(servers[users[user].server].channels);
 		    }
-
 		    
 		    users[user].server = serverId;
+		    console.log("got here");
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
@@ -506,7 +508,7 @@ function setupServer(namespace, serverId){
 	    let sckt = this;
 	    let query = "SELECT sender, timestamp, message FROM private_messages " +
 		" WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) " +
-		" ORDER BY timestamp DESC; ";
+		" ORDER BY timestamp ASC; ";
 
 	    console.log(user + " requesting pms with " + target);
 	    let messages = [];
@@ -669,10 +671,11 @@ function setupServer(namespace, serverId){
 	socket.on('disconnect', function(){
 	    let user = this.handshake.session.user;
 
-	    //updateChannelUsers(users[user].server, users[user].channel, null, user);    	   
+	    updateChannelUsers(users[user].server, users[user].channel, null, user);    	   
 	    //users[user].server = undefined;
 	    
 	    console.log(user + ' left');
+	    
 	    namespace.emit('user_left', {
 		'user': user
 	    });
