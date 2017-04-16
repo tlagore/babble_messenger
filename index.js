@@ -36,13 +36,6 @@ io.use(socketIoCookieParser());
   }
 */
 
-/*
-const options = {
-  key: fs.readFileSync('keys/server.key'),
-  cert: fs.readFileSync('keys/server.crt')
-};
-*/
-//var http = require('https').createServer(options, app);
 
 
 var users = {};
@@ -50,7 +43,6 @@ var users = {};
 /* IMPORTANT */
 //ensure the database is enforcing foreign key restraints
 
-/* temporarily disabling till I can figure out why sqlite is throwing a foreign key mismatch */
 db.run("PRAGMA foreign_keys = ON;", function(err){});
 
 /* server format:
@@ -564,6 +556,11 @@ function setupServer(namespace, serverId){
 		//query complete
 		sckt.emit('generate_private_messages', { 'messages' : messages });
 	    });
+	});
+
+	socket.on('save_settings', function(data){
+	    let phonetic = data.phonetic;
+	    let volume = data.volume;
 	});
 
 	socket.on('private_message', function(data){

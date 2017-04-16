@@ -31,6 +31,7 @@ $(function(){
     var peer_me;
     
     var audio_stream;
+    var server_socket;
     var socket = io();
     var whoami = "";
     var owner = "";
@@ -38,7 +39,7 @@ $(function(){
     socket.on("join_server", function(data){
 	owner = data.owner;
 	$('#server-name').html(data.owner + "'s server");
-	var server_socket = io("/" + data.server);
+	server_socket = io("/" + data.server);
 
 	function initAudio(stream){
 	    //console.log("got here");
@@ -806,7 +807,16 @@ $(function(){
     });
 
     $('#save-settings').click(function(){
-	alert('Save settings.');
+	let phonetic = $('#phonetic-input').val();
+
+	if (phonetic == ''){
+	    phonetic = whoami;
+	}
+	
+	server_socket.emit('save_settings', {
+	    'phonetic': phonetic,
+	    'volume': $('#vol_slider_txt').html();
+	});
     });
     
     $('#user-message').hide();
