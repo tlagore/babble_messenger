@@ -372,7 +372,6 @@ app.get("/chat/:serverId", function(req, res){
 		    }
 		    
 		    users[user].server = serverId;
-		    console.log("got here");
 		    // we haven't seen this server yet, no users are on it, set up
 		    // server namespace. (to which the clients of that server will talk to)
 		    if (servers[serverId] == undefined){
@@ -510,7 +509,6 @@ function setupServer(namespace, serverId){
 		" WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) " +
 		" ORDER BY timestamp ASC; ";
 
-	    console.log(user + " requesting pms with " + target);
 	    let messages = [];
 	    
 	    db.each(query, target, user, user, target, function(err, row){
@@ -578,7 +576,6 @@ function setupServer(namespace, serverId){
 
 	    let this_socket = this;
 
-	    console.log("user: " + user + " on server " + server + " wants to delete channel " + channel);
 	    if (channel == "DefaultChannel"){
 		this_socket.emit('display_error', {
 		    'error': 'Protected Channel',
@@ -613,6 +610,82 @@ function setupServer(namespace, serverId){
 	    }
 	});
 
+	function renameChannel(old_name, new_name, server){	   
+	    for(let i = 0; i < servers[server].channels.length; i++){
+		if(servers[server].channels[i][0] == old_name){
+		    servers[server].channels[i][0] = new_name;
+		}
+	    }	    
+	}
+	
+	socket.on('rename_channel', function(data){
+	    let user = this.handshake.session.user;
+	    let server = users[user].server;
+	    
+	    let channel = data.new_name;
+	    let old_channel = data.old_name;
+	    let checkName = "SELECT channel_name FROM channels WHERE channel_name = ? AND server_id = ?;";
+
+	    let renameChannelQuery = "UPDATE channels SET channel_name = ? WHERE channel_name = ? " +
+		" AND server_id = ?;";
+
+	    let sckt = this;
+
+	    if(user == servers[server].owner){
+		if(old_channel == "DefaultChannel"){
+		    sckt.emit('display_error', {
+			'error': 'Protected Channel',
+			'msg': 'Cannot rename DefaultChannel'
+		    });
+		}else if(validator.isAlphanumeric(channel)){
+		    db.get(checkName, channel, server, function(err, row){
+			if(err){
+			    //handle error
+			    sckt.emit('display_error',{
+				'error': 'Internal Error',
+				'msg': 'Unable to rename channel'
+			    });
+			}else{
+			    if(row){
+				sckt.emit('display_error',{
+				    'error': 'Channel Exists',
+				    'msg': 'Unable to rename channel, that channel already exists.'
+				});			    
+			    }else{
+				db.run(renameChannelQuery, channel, old_channel, server, function(err){
+				    if(err){
+					sckt.emit('display_error',{
+					    'error': 'Internal Error',
+					    'msg': 'Unable to rename channel'
+					});
+				    }else{
+					renameChannel(old_channel, channel, server);
+
+					servers[server].server.emit('channel_changed_name', {
+					    'old_channel' : old_channel,
+					    'new_channel' : channel
+					});
+				    }
+				});
+			    }
+			}
+		    });
+		}else{
+		    sckt.emit('display_error', {
+			'error': 'Bad channel name',
+			'msg': 'Channel name must be alphanumeric (no spaces)'
+		    });
+		}
+	    }else{
+		//not server owner
+		sckt.emit('display_error', {
+		    'error': 'Insufficient Privilege',
+		    'msg': 'You are not the owner of this server.'
+		});
+	    }
+	});
+
+	
 	function deleteChannelByName(channel, server){
 	    for(let i = 0; i < servers[server].channels.length; i++){
 		if(servers[server].channels[i][0] == channel){
@@ -686,9 +759,11 @@ function setupServer(namespace, serverId){
 	let query = "INSERT INTO messages (server_id, channel_name, user, timestamp, content) " +
 	    "VALUES (?, ?, ?, ?, ?);";
 	db.run(query, server, channel, user, utc, msg, function(err){
-	    console.log("Error inserting message");
-	    console.log(server + " " + channel + " " + user + " " + utc + " " + msg);
-	    console.log(err);
+	    if(err){
+		console.log("Error inserting message");
+		console.log(server + " " + channel + " " + user + " " + utc + " " + msg);
+		console.log(err);
+	    }
 	});
     }
 
@@ -734,7 +809,6 @@ function setupServer(namespace, serverId){
 
     //
     function userInChannel(user, channel){
-	console.log(channel);
 	let userExists  = false;
 	for(let i = 0; i < channel[1].length; i++){
 	    if(user == channel[1][i]){
@@ -766,6 +840,7 @@ var toType = function(obj) {
   return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
 }
 
+//Doesnt look like we're using this function
 function logResponse(connection, query){
     connection.query(query, function(error, results){
 	if(error){

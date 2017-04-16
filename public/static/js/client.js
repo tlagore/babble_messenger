@@ -24,11 +24,12 @@ $.ajax({
    chrome. Took like 3 hours to figure out.
 */
 $(function(){
-    /*var isChrome = !!window.chrome && !!window.chrome.webstore;
+    var isChrome = !!window.chrome && !!window.chrome.webstore;
     if(isChrome){
-	$('#view-messages').css('overflow', 'auto');
+	$('#user-pms').css('overflow', 'auto');
+	$('.pm-message-wrapper').css('overflow', 'hidden');
     }
-    */
+    
 
 });
 
@@ -142,12 +143,19 @@ $(function(){
 	});
 
 	server_socket.on("display_error", function(data){
-	    console.log('in here');
 	    let error = data.error;
 	    let msg = data.msg;
 	    displayMessage(error, msg);
 	});
 
+	server_socket.on("channel_changed_name", function(data){
+	    let old_name = data.old_channel;
+	    let new_name = data.new_channel;
+	    $channel = $('#channel-' + old_name);
+	    
+	    $channel.html(new_name);
+	    $channel.attr('id', 'channel-' + new_name);
+	});
 	
 
 	function changeChannel(channel){
@@ -225,7 +233,7 @@ $(function(){
 	    }
 	    
 	    if(sender != $('#pm-cur-user').html()){
-		animateUser($user);
+		$.playSound("/static/sounds/communication-channel");
 		let counterDiv = $('#pm-' + sender + '-counter');
 		if(counterDiv.html() == '0'){
 		    counterDiv.html('1');
@@ -408,6 +416,13 @@ $(function(){
 		$rename.click(function(){
 		    //TODO implement
 		    //renameChannel();
+		    let rename = prompt("Please enter a new channel name");
+		    if(rename){
+			server_socket.emit('rename_channel', {
+			    'old_name': channel_name,
+			    'new_name': rename
+			});
+		    }
 		});
 
 		$menuItem.append($header);

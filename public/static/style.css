@@ -579,17 +579,40 @@ input[type="submit"]:hover{
     color: red;
 }
 
+
+
 .private-message-users .private-message-user:hover{
     background-color: black;
     color: white;
     cursor: pointer;
 }
 
+.pm-message-wrapper{
+    /* This wrapper was written to fix the bug that firefox has with
+       not allowing flexboxes to scroll. Took way too long to figure out. Fix your stuff firefox
+   */
+    display: flex;
+    flex-grow: 2;
+    flex-basis: 0%;
+    height: 85%;
+    
+    flex-direction: column;
+
+    overflow-y: scroll;
+
+    min-height: 0px;
+    min-width: 0px;
+}
+
 .private-message-messages{
     display: flex;
     flex-direction: column-reverse;
+    flex: 1;
+    flex-shrink: 0;
+
     background-color: #333333;
-    height: 85%;
+    height: 100%;
+    min-height: 0;
 }
 
 .private-message-send-message{
@@ -604,7 +627,10 @@ input[type="submit"]:hover{
     position: relative;
     display: flex;
     width: 65%;
-    flex-direction: column;
+    flex-direction: column;    
+    
+    min-height: 0;
+    min-widht: 0;
 }
 
 .private-message-container{
