@@ -9,10 +9,6 @@ $(function(){
 	}
     };
 
-    $('#my-server').click(function(){
-	window.location.replace("chat/0");
-    });
-
     $('#register_user').on("input", function(){
 	var timeOut = setTimeout(checkUser, 500);
 	$('#register_user').css('background-image', 'url(/static/glyphicons/glyphicons-541-hourglass.png)');

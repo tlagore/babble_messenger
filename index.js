@@ -774,6 +774,8 @@ function setupServer(namespace, serverId){
 	    //users[user].server = undefined;
 	    
 	    console.log(user + ' left');
+
+	    this.handshake.session.destroy();
 	    
 	    namespace.emit('user_left', {
 		'user': user

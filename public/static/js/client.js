@@ -438,6 +438,11 @@ $(function(){
 
 	});
 
+	$('#logout-btn').click(function(event){
+	    server_socket.disconnect();
+	    window.location.replace("/");
+	});
+
 	$('#input-msg').keydown(function(event){	
 	    //let history = JSON.parse(localStorage.getItem("history"));
 	    //let count = parseInt(localStorage.getItem("history_count"));

@@ -335,7 +335,10 @@ input[type="submit"]:hover{
 .header-container{
     display: flex;
     align-items: center;
+    justify-content: space-between;
     height: 5%;
+    padding-right: 3%;
+    padding-left: 1%;
     width: 100%;
 }
 
@@ -510,13 +513,11 @@ input[type="submit"]:hover{
     font-weight: bold;
     font-size: calc(15px + .3vw + .3vh);
     color: white;
-    width: 65%;
     /*color: #32a2f7;*/
 }
-@media screen and (min-width: 640px){
-    .header-main{
-	width: 50%;
-    }
+
+a{
+    color: White;
 }
 
 .send-message-area{
@@ -715,7 +716,6 @@ input[type="submit"]:hover{
     position: absolute;
     display: flex;    
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;		   
     width: 45%;
     background-color: Black;
@@ -750,8 +750,8 @@ input[type="submit"]:hover{
     color: white;
     font-size: calc(12px + .3vw);
     height: 20%;
-    /*margin-top: 3%;
-    margin-bottom: 3%;*/
+    margin-top: 3%;
+    margin-bottom: 3%;
     padding-top: 3%;
     padding-bottom: 3%;
 }
