@@ -721,10 +721,13 @@ $(function(){
     $('#settings-btn').click(function(){
 	var winWidth = $(window).width() + "px";
 	var settingsPanel = $('#settings-panel');
-
+	var left = $('#settings-panel').css('width');
+	left = parseInt(left.replace('px',''))/$(window).width() * 100;
+	left = left + "%";
+	
 	if (settingsPanel.css('left') == winWidth){
 	    settingsPanel.animate({
-		left: '50%'
+		left: left
 	    }, 500, function(){});
 	}else{
 	    settingsPanel.animate({

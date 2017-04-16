@@ -91,7 +91,7 @@ body{
 .settings-wrapper{
     position: absolute;
     z-index: 3;
-    width: 50%;
+    width: 80%;
     height: 80%;
     top: 5%;
     /* where it should be if its visible */
@@ -102,6 +102,13 @@ body{
     border-width: 2px;
     border-style: solid;
 }
+
+@media screen and (min-width: 640px){
+    .settings-wrapper{
+	width: 50%;
+    }
+}
+
 
 
 .info-message{
@@ -737,7 +744,7 @@ a{
     width: 100%;
     text-align: center;
     margin-bottom: 3%;
-    font-size: calc(12px + .5vw + .5vh);
+    font-size: calc(10px + .5vw + .5vh);
     font-family: 'Cabin', sans-serif;
 }
 
