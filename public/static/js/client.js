@@ -214,6 +214,19 @@ $(function(){
 	    $('#' + user).insertAfter('#channel-' + channel);
 
 	    if(channel == mychannel){
+		navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+		    /* use the stream */
+		    var call = peer_me.call(data.user, stream);
+		    console.log(call);
+		    call.on('stream', function(remoteStream){
+			console.log('connected to ' + this.peer);
+			var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
+			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+		    });
+		}).catch(function(err) {
+		    /* handle the error */
+		    console.log(err);
+		});
 		connectToPeer(user);
 	    }else{
 		$('#audio-' + data.user).remove();
