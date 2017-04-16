@@ -143,3 +143,37 @@ function clearRegisterFields(){
     $('#register_password').trigger('blur');
     $('#register_confirm_password').trigger('blur');
 }
+
+////////////////////////////////////////////////////////////////////////////////
+///////                Enter Button Logic                                 //////
+////////////////////////////////////////////////////////////////////////////////
+
+
+$(document).ready(function(){
+  /*
+  Where 13 is equal to enter key
+  */
+
+  // For pressing enter on login password text box
+    $('#login_password').keypress(function(e){
+      if(e.keyCode==13)
+      $('#login_submit').click();
+    });
+
+  // For pressing enter on login server name text box
+    $('#login_server').keypress(function(e){
+      if(e.keyCode==13)
+      $('#login_submit').click();
+    });
+
+  // For pressing enter on login server name text box
+    $('#register_confirm_password').keypress(function(e){
+      if(e.keyCode==13)
+      $('#register_submit').click();
+    });
+
+});
+
+////////////////////////////////////////////////////////////////////////////////
+///////              End  Enter Button Logic                              //////
+////////////////////////////////////////////////////////////////////////////////
