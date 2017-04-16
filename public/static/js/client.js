@@ -113,11 +113,6 @@ $(function(){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
 	    if (data.user != whoami){
-		/*
-		var conn = peer_me.connect(data.user);
-		conn.on('open', function(){
-		    conn.send('please work');
-		    });*/
 		if(data.channel == mychannel){
 		    //clear any possible streams we had from that user from disconnecting/reconnecting
 		    $('#audio-'+data.user).remove();
@@ -134,16 +129,11 @@ $(function(){
 			/* handle the error */
 			console.log(err);
 		    });
-		    //connectToPeer(data.user);
-		    
 		}
 		
-		/*call.on('stream', function(remoteStream){
-		    console.log('eyyyyyyyyy');
-		});
-		*/
-		
-		formattedChannelUser(data.user).insertAfter($('#channel-' + data.channel));
+		let $user = formattedChannelUser(data.user);
+		$user.insertAfter($('#channel-' + data.channel));
+
 		responsiveVoice.speak(data.user + " has joined the server.");
 	    }
 
@@ -227,7 +217,7 @@ $(function(){
 		    /* handle the error */
 		    console.log(err);
 		});
-		connectToPeer(user);
+		
 	    }else{
 		$('#audio-' + data.user).remove();
 	    }
@@ -404,8 +394,10 @@ $(function(){
 		//down arrow
 	    }else if(event.keyCode == 13){
 		let msg = $('#input-msg').val();
-		
-		if(msg != ''){
+
+		if(msg.startsWith('/volume')){
+		    handleVolume(msg);
+		}else if(msg != ''){
 
 		    server_socket.emit("channel_text_message", { 'message' : msg });
 		}
@@ -414,10 +406,124 @@ $(function(){
 	    }
 	});
 
+	function handleVolume(msg){
+	    let msgParts = msg.split(' ');
+
+	    if(msgParts.length != 3){
+		let $msg = $('<div>', {
+		    'class': 'message-content',
+		    'text': '1 Invalid usage, usage is /volume [user] [0-100]'
+		}).css('color','red');
+		$('#view-messages').prepend($msg);
+	    }else{
+		try{
+		    let vol = parseInt(msgParts[2]);
+		    if(vol >= 0 && vol <= 100){
+			let $user = document.getElementById('audio-' + msgParts[1]);
+			if($user == null){
+			    printErrorMessage('User has no audio or does not exist.');
+			}else{
+			    $user.volume = vol / 100;
+			}
+		    }else{
+			printErrorMessage('2 Invalid usage, usage is /volume [user] [0-100]');
+		    }
+		}catch(err){
+		    console.log(err);
+		    printErrorMessage('3 Invalid usage, usage is /volume [user] [0-100]');
+		}
+	    }
+	}
+
+	function printErrorMessage(msg){
+	    let $msg = $('<div>', {
+		'class': 'message-content',
+		'text': msg
+	    }).css('color','red');
+	    $('#view-messages').prepend($msg);	    
+	}
+
 	function generateUserMenu(div, user_name){
 	    div.click(function(e){
 		e.preventDefault();
 	    });
+
+	    function event(e){
+		$('#menu-item').remove();
+		var x = e.pageX + 'px';
+		var y = e.pageY + 'px';
+		var $menuItem = $('<div>', {
+		    'id': 'menu-item',
+		    'class': 'menu-item'
+		}).css({
+		    'left': x,
+		    'top': y		    
+		});
+
+		var $header = $('<div>', {
+		    'class': 'generic-header',
+		    'text': user_name
+		});
+
+		var $vol_header = $('<span>', {
+		    'html': 'Volume: '
+		});
+
+		var $vol = $('<span>', {
+		    'id': 'vol-' + user_name,
+		    'text': 50
+		});
+
+		var $slider_wrapper = $('<div>',{
+		});//.css('width', '100%');	    					
+		
+		var $vol_slider = $('<div>').css('width', '80%');
+
+		$vol_slider.slider({
+		    orientation: "horizontal",
+		    range: false,
+		    min: 0,
+		    max: 100,
+		    value: 50,
+		    step: 1,
+		    animate: true,
+		    slide: function (event, ui) {
+			$("#vol-" + user_name).text(ui.value);
+		    }
+		});
+
+		$vol_header.append($vol);		
+
+		$menuItem.append($header);
+		$menuItem.append($vol_header);
+		$menuItem.append($vol_slider);
+			       
+		$(document.body).append($menuItem);        
+
+		//stop right click menu from showing up
+		e.preventDefault();
+	    }
+
+	    //android support
+	    function longPress(div){
+		var pressTimer;
+		
+		div.on('mousedown', function(e){
+		    pressTimer = window.setTimeout(function(){
+			event(e);
+		    }, 1000);
+		});
+		
+		div.on('mouseup', function(e){
+		    clearTimeout(pressTimer);
+		});
+	    }
+
+	    if (isMobile()){
+		longPress(div);		
+	    }else{
+		div.contextmenu(event);
+	    }
 	}
 
 	function generateChannelMenu(div, channel_name){
@@ -508,6 +614,9 @@ $(function(){
 		'text': user
 	    });
 
+	    if(user != whoami){
+		generateUserMenu($div, user);
+	    }
 
 	    if (color != undefined && color != null){
 		$div.css('color', color);
