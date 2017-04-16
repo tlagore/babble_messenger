@@ -173,6 +173,7 @@ $(function(){
 	});
 
 	server_socket.on("user_left", function(data){
+	    $('#audio-' + data.user).remove();
 	    $('#' + data.user).remove();
 	});
 
@@ -439,6 +440,7 @@ $(function(){
 	});
 
 	$('#logout-btn').click(function(event){
+	    server_socket.emit("logout");
 	    server_socket.disconnect();
 	    window.location.replace("/");
 	});

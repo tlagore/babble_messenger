@@ -763,20 +763,28 @@ function setupServer(namespace, serverId){
 	    }	    
 	});
 
-	// setup events for that socket
-	socket.on('disconnect', function(){
-	    let user = this.handshake.session.user;
-
-	    updateChannelUsers(users[user].server, users[user].channel, null, user);    	   
-	    //users[user].server = undefined;
-	    
-	    console.log(user + ' left');
-
+	socket.on('logout', function(){
+	    updateChannelUsers(users[user].server, users[user].channel, null, user);
 	    this.handshake.session.destroy();
-	    
+
+	    console.log(user + ' logged out.');
 	    namespace.emit('user_left', {
 		'user': user
 	    });
+	});
+
+	// setup events for that socket
+	socket.on('disconnect', function(){
+	    if(this.handshake.session){
+		let user = this.handshake.session.user;
+
+		updateChannelUsers(users[user].server, users[user].channel, null, user);
+		console.log(user + ' left')
+		
+		namespace.emit('user_left', {
+		    'user': user
+		});
+	    }
 	});
     });
 
