@@ -57,7 +57,13 @@ $(function(){
 		    call.on('stream', function(remoteStream){
 			console.log("connected to " + this.peer);
 			var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
-			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);
+			let vol = parseInt($('#vol_slider_txt').html());
+
+			if(!isNaN(vol)){
+			    let aud = document.getElementById('audio-' +this.peer);
+			    aud.volume = (vol / 100);
+			}
 		    });
 		}).catch(function(err) {
 		    console.log(err);
@@ -157,6 +163,10 @@ $(function(){
 	    let old_name = data.old_channel;
 	    let new_name = data.new_channel;
 	    $channel = $('#channel-' + old_name);
+
+	    if(mychannel == old_name){
+		mychannel = new_name;
+	    }
 	    
 	    $channel.html(new_name);
 	    $channel.attr('id', 'channel-' + new_name);
@@ -212,7 +222,13 @@ $(function(){
 		    call.on('stream', function(remoteStream){
 			console.log('connected to ' + this.peer);
 			var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
-			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);
+			let vol = parseInt($('#vol_slider_txt').html());
+
+			if(!isNaN(vol)){
+			    let aud = document.getElementById('audio-' +this.peer);
+			    aud.volume = (vol / 100);
+			}
 		    });
 		}).catch(function(err) {
 		    /* handle the error */
@@ -815,7 +831,7 @@ $(function(){
 	
 	server_socket.emit('save_settings', {
 	    'phonetic': phonetic,
-	    'volume': $('#vol_slider_txt').html();
+	    'volume': $('#vol_slider_txt').html()
 	});
     });
     
