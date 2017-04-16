@@ -103,6 +103,11 @@ $(function(){
 	    //responsiveVoice.speak(msg);
 
 	    let formatted_msg = generate_message(user, time, msg);
+
+	    if(document.getElementById('text-to-voice').checked){
+		responsiveVoice.speak(msg);
+	    }
+	    
 	    $('#view-messages').prepend(formatted_msg);
 	});
 
@@ -415,7 +420,6 @@ $(function(){
 		if(msg.startsWith('/volume')){
 		    handleVolume(msg);
 		}else if(msg != ''){
-
 		    server_socket.emit("channel_text_message", { 'message' : msg });
 		}
 		
@@ -781,13 +785,19 @@ $(function(){
     });
 
     $('#settings-btn').click(function(){
-	var winWidth = $(window).width() + "px";
-	var settingsPanel = $('#settings-panel');
+	animateSettings();
+    });
+
+    function animateSettings(){
+	var winWidth = parseInt($(window).width());
+	var settingsPanel = $('#settings-panel');	
 	var left = $('#settings-panel').css('width');
+	let settingsWidth = parseInt(settingsPanel.css('left').replace('px', ''));
 	left = parseInt(left.replace('px',''))/$(window).width() * 100;
 	left = left + "%";
-	
-	if (settingsPanel.css('left') == winWidth){
+	let inRange = (settingsWidth >= winWidth - 100 && settingsWidth <= winWidth + 100); 
+
+	if (inRange){
 	    settingsPanel.animate({
 		left: left
 	    }, 500, function(){});
@@ -796,7 +806,7 @@ $(function(){
 		left: '100%'
 	    }, 500, function(){});
 	}
-    });
+    }
 
     $('#add-channel').click(function(){
 	let channelName = prompt("Please enter a channel name");
@@ -833,6 +843,8 @@ $(function(){
 	    'phonetic': phonetic,
 	    'volume': $('#vol_slider_txt').html()
 	});
+
+	animateSettings();
     });
     
     $('#user-message').hide();
