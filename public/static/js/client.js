@@ -336,6 +336,8 @@ $(function(){
 	    if($('#private-messages').css('display') == 'none'){
 		let counter = parseInt($('#pm-counter').html());
 
+		$.playSound("/static/sounds/communication-channel");
+
 		if (counter == 0 || isNaN(counter)){
 		    $('#pm-counter').html('1');
 		}else{
@@ -616,8 +618,7 @@ $(function(){
 	$dialog.append($message);
 	$dialog.append($okay);
 	$overlay.append($dialog);
-	$(document.body).append($overlay);
-	
+	$(document.body).append($overlay);	
     }
 
     function generate_message(user, timestamp, msg){
@@ -752,7 +753,7 @@ function isMobile(){
 
     return false;
 }
-
+/*
 function showMessage(msg){
     var user_message = $('#user-message');
     var user_message_content = $('#user-message-content');
@@ -773,168 +774,7 @@ function showMessage(msg){
 		     $(this).hide();
 		 });
 }
-
-
-/*
-function readFile(file) {
-    alert(file.name);
-    var reader = new FileReader();
-    reader.onload = readSuccess;                                            
-    function readSuccess(evt) { 
-        var field = document.getElementById('view-messages');                        
-        field.innerHTML = evt.target.result;                                
-    };
-    reader.readAsText(file);                                              
-} 
 */
-
-$(function(){
-    //var io = require('socket.io-client');
-    //var ss = require('socket.io-stream');
-    var socket = io.connect('/');
-
-    
-    $('#selectedFile').change(function(e){
-	var file = e.target.files[0];
-	var stream = ss.createStream();
-
-	ss(socket).emit('write-file', stream, { name: file.name });
-	ss.createBlobReadStream(file).pipe(stream);	
-    });
-    
-    
-    /*
-    document.getElementById('selectedFile').onchange = function(e) {
-	let file = document.getElementById('selectedFile').files[0];
-	var reader = new FileReader();
-	reader.onload = readSuccess;                                            
-	function readSuccess(evt) { 
-            var field = document.getElementById('view-messages');                        
-            field.innerHTML = evt.target.result;                                
-	};
-
-	ss(socket).emit('write-file', stream, { name: file.name });
-	ss.createBlobReadStream().pipe(stream);
-    };*/
-
-    /*
-
-    var socket = io();
-    localStorage.setItem("history", JSON.stringify({'chat_history': []}));
-    localStorage.setItem("history_count", "0");
-    socket.emit('loaded');
-
-
-    socket.on('chat', function(msg){
-	user = msg.user;
-	timestamp = msg.timestamp;
-	message = msg.contents;
-	color = msg.color;
-
-	let formatted_message = generate_message(user, new Date(timestamp).toUTCString(), message, timestamp, color);
-	$('#view-messages').prepend(formatted_message);
-
-	display_message(user, timestamp);
-
-	if(user == "server" || $('#me-'+user).html() == user)
-	    scrollToBottom();
-    });
-
-    socket.on('user_joined', function(msg){
-	let name = msg.user_name;
-	let color = msg.user_color;
-	
-	if(!$('#'+name).length){
-	    $('#view-users').append('<h4 style="color:' + color + ';" id=' + name + '>' + name + '</h4>');
-	}
-    });
-
-    socket.on('user_left', function(name){
-	if($('#'+name).length){
-
-	}
-    });
-
-    socket.on('user_name', function(user){
-	let name = user.user_name;
-	let color = user.user_color;
-	
-	$('#whoami').html('You are: <b id="me-' + name + '" style="color:' + color + '">' + name + '</b>');
-    });
-
-    socket.on('color_changed', function(msg){
-	let name = msg.user_name;
-	let color = msg.user_color;
-
-	if($('#'+name).length){
-	    $('#'+name).css('color', color);
-	}
-    });
-
-    socket.on('name_changed', function(msg){
-	let old_name = msg.old_name;
-	let new_name = msg.new_name;
-	let color = msg.user_color;
-	let server_color = msg.server_color;
-
-	let timestamp = new Date().getTime();
-
-	let formatted_message = '<div id=server' + timestamp + 
-	    ' style="opacity:0.1; color:' + server_color +'" class="message-content">'
-	    + '<i style="color:' + color + '">' + old_name + '</i> changed nickname to '
-	    + '<i style="color:' + color + '">' + new_name + '</i></div>';
-	
-	$('#view-messages').prepend(formatted_message);
-	display_message("server", timestamp);
-    });
-
-    socket.on('change_name', function(msg){
-	let name = msg.old_name;
-	let new_name = msg.new_name;
-	let color = msg.user_color;
-
-	if($('#'+name).length){
-	    $('#'+name).remove();
-	    $('#view-users').append('<h4 style="color:' + color + ';" id=' + new_name + '>' + new_name + '</h4>');
-	}
-    });
-    */
-    
-    /*
-    
-    $('#submit-message').click(function(){
-	let msg = $('#input-msg').val()
-
-	if(msg.startsWith("/nickcolor")){
-	    let goodColor =  verifyColor(msg);
-	    if (goodColor){
-		socket.emit('chat', msg);
-	    }else{
-		send_server_message("Bad color. Try another css color. (lower case)");
-	    }
-	}else{
-	    if (msg != ''){
-		socket.emit('chat', msg);
-		scrollToBottom();
-	    }
-	}
-	$('#input-msg').val('');
-    });
-    */
-});
-
-function clearRegisterFields(){
-    $('#register_user').val('');
-    $('#register_email').val('');
-    $('#register_password').val('');
-    $('#register_confirm_password').val('');
-    $('#register_user').css('background-image', '');
-
-    $('#register_user').trigger('blur');
-    $('#register_email').trigger('blur');
-    $('#register_password').trigger('blur');
-    $('#register_confirm_password').trigger('blur');
-}
 
 //scroll to bottom of messages
 function scrollToBottom(){
@@ -942,57 +782,6 @@ function scrollToBottom(){
     messages.scrollTop = messages.scrollHeight;
 }
 
-
-function send_server_message(msg){
-    let timestamp = new Date().getTime();
-    let formatted_message = server_message(timestamp, msg, "#e24646");
-    $('#view-messages').prepend(formatted_message);
-    display_message(user, timestamp);
-}
-    
-
-//function taken from stackoverflow answer
-//http://stackoverflow.com/questions/6386090/validating-css-color-names
-function checkColorString(stringToTest){
-    let rgb = $c.name2rgb(stringToTest).RGB;
-    let rgb_digits = rgb.split(", ")
-    return(!isNaN(rgb[0]));    
-}
-
-
-/* animate the message appearing */ 
-function display_message(user, timestamp){
-    let id = '#' + user + timestamp;
-    $(id).animate({
-	opacity: 1.0
-    }, 750, function(){ //animation finish
-    });
-}
-
-function server_message(utc, msg, color){
-    return mesg = '<div id=server' + utc + 
-	' style="opacity:0.1; color:' + color +'" class="message-content">' + msg + '</div>'
-}
-/*
-function generate_message(user, timestamp, msg, utc, color){
-    if (user == "server"){
-	return server_message(utc, msg, color)
-    }else{
-	let message = msg;
-
-	if($('#me-'+user).html() == user){
-	    message = '<i><font style="color:#b2f3f7">' + msg + '</font></i>';
-	}
-
-	return '<div id=' + user + utc + 
-	    ' style="opacity:0.1;" class="message">' +
-	    '<div class="message-header">' +
-	    '<div class="message-user" style="color: ' + color + '">' + user + '</div>' + 
-	    '<div class="message-time">' + timestamp + '</div>' +
-	    '</div><div class="message-content">'+ message + '</div></div>';
-    }
-}
-*/
 
 
 ////////////////////////////////////////////////////////
