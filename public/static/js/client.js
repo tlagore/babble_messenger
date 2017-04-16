@@ -125,6 +125,7 @@ $(function(){
 			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
 		    });
 		}).catch(function(err) {
+		    console.log(err);
 		    /* handle the error */
 		});		    
 	    });

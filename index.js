@@ -35,6 +35,16 @@ io.use(socketIoCookieParser());
       "channel": "channel_id" //the channel on that server the user is in
   }
 */
+
+/*
+const options = {
+  key: fs.readFileSync('keys/server.key'),
+  cert: fs.readFileSync('keys/server.crt')
+};
+*/
+//var http = require('https').createServer(options, app);
+
+
 var users = {};
 
 /* IMPORTANT */
