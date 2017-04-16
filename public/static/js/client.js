@@ -190,7 +190,21 @@ $(function(){
 		if(data.channel == mychannel){
 		    //clear any possible streams we had from that user from disconnecting/reconnecting
 		    $('#audio-'+data.user).remove();
-		    connectToPeer(data.user);		    
+		    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+			/* use the stream */
+			var call = peer_me.call(data.user, stream);
+			console.log(call);
+			call.on('stream', function(remoteStream){
+			    console.log('connected to ' + this.peer);
+			    var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
+			    audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+			});
+		    }).catch(function(err) {
+			/* handle the error */
+			console.log(err);
+		    });
+		    //connectToPeer(data.user);
+		    
 		}
 		
 		/*call.on('stream', function(remoteStream){
@@ -205,21 +219,20 @@ $(function(){
 	    //Use this to see a list of possible voice types
 	    //alert(JSON.stringify(responsiveVoice.getVoices()));
 	});
-
+	/*
 	function connectToPeer(user){
 	    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-		/* use the stream */
-		var call = peer_me.call(user, stream);
+	    var call = peer_me.call(user, stream);
 		call.on('stream', function(remoteStream){
-		    console.log('connected to ' + this.peer);
+		console.log('connected to ' + this.peer);
 		    var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
 		    audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
-		});
-	    }).catch(function(err) {
-		/* handle the error */
+		    });
+		}).catch(function(err) {
 		console.log(err);
-	    });
-	}
+		});
+	    }
+	*/
 
 	server_socket.on("add_channel", function(data){
 	    formattedChannel(data.channel).insertBefore($('#channels-end'));
