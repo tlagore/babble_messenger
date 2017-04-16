@@ -1,23 +1,3 @@
-/*
-//ajax call format
-$.ajax({
-    url: '/method_name',
-    data: {
-    "data1_name": "data1",
-    "data2_name": "data2"
-    },
-    type: 'POST', //can change method type
-    success: function(data){
-        //ajax call returned successfully
-    },
-    error: function(xhr, status, error){
-        //ajax call failed - no server response
-    },
-});
-
-*/
-
-
 
 // document ready calls
 /* This disgusting hack of a function fixes the firefox bug without killing scrolling on 
@@ -33,36 +13,12 @@ $(function(){
 
 });
 
-let API_KEY;
-let call;
-var recorder = null;
+//let API_KEY;
+//let call;
+//var recorder = null;
 
 //Make sure we're using the correct getUserMedia for our browser
 navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mediaDevices.getUserMedia || navigator.msGetUserMedia || navigator.mozGetUserMedia);
-
-/*
-navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-*/
-
-//load media device- audio. Asks user for permission to use microphone
-$(function(){
-    /*
-    navigator.getUserMedia({ audio: true }).then(
-	function(stream){
-	    //recorder = new Recorder();
-	    
-	}
-    ).catch(
-	//didn't get stream, show error message
-	function(err){
-	    showMessage("If you do not allow microphone access, you cannot use the " +
-			"voice functionality of this site. " +
-		       "You can enable microphone in settings.");
-	}
-    );
-    */
-});
 
 
 /* Setup our socket to handle events */
@@ -84,22 +40,6 @@ $(function(){
 	$('#server-name').html(data.owner + "'s server");
 	var server_socket = io("/" + data.server);
 
-	/* INSERTING PEERJS  */
-	/*
-	server_socket.on('peerjsInit',function(data){
-	    API_KEY = data.apiKey;
-	    //peerJsInit();
-	})*/
-
-	/*
-	server_socket.on('call_peer', function(data){
-	    API_KEY = data.apiKey;
-	    call = data.call;
-	});
-	*/
-
-	/* DONE PEERJS */
-
 	function initAudio(stream){
 	    //console.log("got here");
 	    audio_stream = stream;	    
@@ -108,13 +48,7 @@ $(function(){
 	server_socket.on('startup', function(data){
 	    whoami = data.whoami;
 	    peer_me = new Peer(whoami, {key: data.peerJsKey});
-	    /*
-	    peer_me.on('connection', function(conn){
-		conn.on('data', function(data){
-		    console.log(data);
-		});
-	    });
-	    */
+
 	    peer_me.on('call', function(call){
 		navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
 		    /* use the stream */
@@ -128,10 +62,7 @@ $(function(){
 		    console.log(err);
 		    /* handle the error */
 		});		    
-	    });
-	    
-
-	    //navigator.getUserMedia({ audio: true }, initAudio, function(){});			  
+	    });	   
 	    
 	    mychannel = data.channels[0][0];
 	    $('.channel').remove();
@@ -219,20 +150,7 @@ $(function(){
 	    //Use this to see a list of possible voice types
 	    //alert(JSON.stringify(responsiveVoice.getVoices()));
 	});
-	/*
-	function connectToPeer(user){
-	    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-	    var call = peer_me.call(user, stream);
-		call.on('stream', function(remoteStream){
-		console.log('connected to ' + this.peer);
-		    var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
-		    audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
-		    });
-		}).catch(function(err) {
-		console.log(err);
-		});
-	    }
-	*/
+
 
 	server_socket.on("add_channel", function(data){
 	    formattedChannel(data.channel).insertBefore($('#channels-end'));
@@ -779,6 +697,7 @@ function isMobile(){
 
     return false;
 }
+
 /*
 function showMessage(msg){
     var user_message = $('#user-message');
@@ -807,190 +726,3 @@ function scrollToBottom(){
     var messages = document.getElementById("message-wrapper");
     messages.scrollTop = messages.scrollHeight;
 }
-
-
-
-////////////////////////////////////////////////////////
-///////////////Pure JS Initialization///////////////////
-////////////////////////////////////////////////////////
-
-/*
-// State
-var me = {};
-var myStream;
-var peers = {};
-
-// Call PureJS
-//init();
-
-function init() {
-  if (!navigator.getUserMedia) return unsupported();
-
-  getLocalAudioStream(function(err, stream) {
-    if (err || !stream) return;
-
-      connectToPeerJS(callId, function(err) {
-	  if (err) return;
-	  
-	  registerIdWithServer(me.id);
-	  display(call.peers.length);
-	  if (call.peers.length) callPeers();
-	  else displayShareMessage();
-	  
-      });
-  });
-}
-
-////////////////////////////////////////////////////////
-/////////////End Pure JS Initialization/////////////////
-////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////
-///////////////// PEER JS ///////////////////////
-/////////////////////////////////////////////////
-// Connect to PeerJS and get an ID
-function connectToPeerJS(callId, cb) {
-    display('Connecting to PeerJS...');
-    me = new Peer({key: API_KEY});
-    
-    me.on('call', handleIncomingCall);
-    
-    me.on('open', function() {
-	display('Connected.');
-	display('ID: ' + me.id);
-	cb && cb(null, me);
-    });
-    
-    me.on('error', function(err) {
-	display(err);
-	cb && cb(err);
-    });
-}
-
-// Add our ID to the list of PeerJS IDs for this call
-function registerIdWithServer() {
-    display('Registering ID with server...');
-
-    $.ajax({
-    url: '/add_peer',
-    async: false,
-    data: {
-        "peerid": me.id,
-        "id" : call.id
-    },
-    type: 'POST', //can change method type
-    success: function(data){
-        //ajax call returned successfully
-        if(data.success){
-
-           call = data.call;
-           
-        }else{
-        }
-    },
-    error: function(xhr, status, error){
-        //ajax call failed - no server response
-    },
-    });
-}
-
-// Remove our ID from the call's list of IDs
-function unregisterIdWithServer() {
-  // $.post('/' + call.id + '/removepeer/' + me.id);
-}
-
-// Call each of the peer IDs using PeerJS
-function callPeers() {
-  call.peers.forEach(callPeer);
-}
-
-function callPeer(peerId) {
-  display('Calling ' + peerId + '...');
-  var peer = getPeer(peerId);
-  peer.outgoing = me.call(peerId, myStream);
-
-  peer.outgoing.on('error', function(err) {
-    display(err);
-  });
-
-  peer.outgoing.on('stream', function(stream) {
-    display('Connected to ' + peerId + '.');
-    addIncomingStream(peer, stream);
-  });
-}
-
-// When someone initiates a call via PeerJS
-function handleIncomingCall(incoming) {
-  display('Answering incoming call from ' + incoming.peer);
-  var peer = getPeer(incoming.peer);
-  peer.incoming = incoming;
-  incoming.answer(myStream);
-  peer.incoming.on('stream', function(stream) {
-    addIncomingStream(peer, stream);
-  });
-}
-
-// Add the new audio stream. Either from an incoming call, or
-// from the response to one of our outgoing calls
-function addIncomingStream(peer, stream) {
-  display('Adding incoming stream from ' + peer.id);
-  peer.incomingStream = stream;
-  playStream(stream);
-}
-
-// Create an <audio> element to play the audio stream
-function playStream(stream) {
-  var audio = $('<audio autoplay />').appendTo('body');
-  audio[0].src = (URL || webkitURL || mozURL).createObjectURL(stream);
-}
-
-// Get access to the microphone
-function getLocalAudioStream(cb) {
-  display('Trying to access your microphone. Please click "Allow".');
-
-  navigator.getUserMedia (
-    {video: false, audio: true},
-
-    function success(audioStream) {
-      display('Microphone is open.');
-      myStream = audioStream;
-      if (cb) cb(null, myStream);
-    },
-
-    function error(err) {
-      display('Couldn\'t connect to microphone. Reload the page to try again.');
-      if (cb) cb(err);
-    }
-  );
-}
-
-
-
-////////////////////////////////////
-// Helper functions
-function getPeer(peerId) {
-  return peers[peerId] || (peers[peerId] = {id: peerId});
-}
-
-function displayShareMessage() {
-  display('Give someone this URL to chat.');
-  display('<input type="text" value="' + location.href + '" readonly>');
-
-  $('#display input').click(function() {
-    this.select();
-  });
-}
-
-function unsupported() {
-  display("Your browser doesn't support getUserMedia.");
-}
-
-function display(message) {
-  // $('<div />').html(message).appendTo('#display');
-  console.log(message);
-}
-
-/////////////////////////////////////////////////
-///////////////END PEER JS //////////////////////
-/////////////////////////////////////////////////
-*/
