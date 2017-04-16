@@ -646,6 +646,11 @@ $(function(){
         animate: true,
         slide: function (event, ui) {
             $("#vol_slider_txt").text(ui.value);
+	    let audTag = document.getElementsByTagName("audio");
+            let audioVolume = (ui.value / 100);
+            for(let i = 0; i < audTag.length; i++) {
+            	audTag[i].volume = audioVolume;
+            }
         }
     });
 
