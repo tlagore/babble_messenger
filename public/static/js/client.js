@@ -38,13 +38,17 @@ let call;
 var recorder = null;
 
 //Make sure we're using the correct getUserMedia for our browser
-navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia
+navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mediaDevices.getUserMedia || navigator.msGetUserMedia || navigator.mozGetUserMedia);
 
+/*
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+*/
 
 //load media device- audio. Asks user for permission to use microphone
-$(function(){   
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(
+$(function(){
+    /*
+    navigator.getUserMedia({ audio: true }).then(
 	function(stream){
 	    //recorder = new Recorder();
 	    
@@ -57,6 +61,7 @@ $(function(){
 		       "You can enable microphone in settings.");
 	}
     );
+    */
 });
 
 
@@ -67,7 +72,9 @@ $(function(){
     });
     
     //$('#user-pms').prepend(generate_message("User 1", new Date().toUTCString(), "huehuheuheu"));
+    var peer_me;
     
+    var audio_stream;
     var socket = io();
     var whoami = "";
     var owner = "";
@@ -77,31 +84,58 @@ $(function(){
 	$('#server-name').html(data.owner + "'s server");
 	var server_socket = io("/" + data.server);
 
-
 	/* INSERTING PEERJS  */
+	/*
+	server_socket.on('peerjsInit',function(data){
+	    API_KEY = data.apiKey;
+	    //peerJsInit();
+	})*/
 
-	server_socket.on('peerjsInit',function(){
-	    init();
-	})
-	
+	/*
 	server_socket.on('call_peer', function(data){
 	    API_KEY = data.apiKey;
 	    call = data.call;
 	});
-
+	*/
 
 	/* DONE PEERJS */
+
+	function initAudio(stream){
+	    //console.log("got here");
+	    audio_stream = stream;	    
+	}
 	
 	server_socket.on('startup', function(data){
-	    //alert(data.message) - a general purpose message from the server
-
-	    //might be useful for client to know who they are and channel they are in
 	    whoami = data.whoami;
+	    peer_me = new Peer(whoami, {key: data.peerJsKey});
+	    /*
+	    peer_me.on('connection', function(conn){
+		conn.on('data', function(data){
+		    console.log(data);
+		});
+	    });
+	    */
+	    peer_me.on('call', function(call){
+		navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+		    /* use the stream */
+		    call.answer(stream);
+		    call.on('stream', function(remoteStream){
+
+			var audio = $('<audio autoplay />').appendTo('body');
+			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+			console.log("received stream");
+		    });
+		}).catch(function(err) {
+		    /* handle the error */
+		});		    
+	    });
+	    
+
+	    //navigator.getUserMedia({ audio: true }, initAudio, function(){});			  
+	    
 	    mychannel = data.channels[0][0];
 	    $('.channel').remove();
 	    $('.channel-user').remove();
-	   
-	    console.log(data.channels[0][1].join());
 	    
 	    for(let i = data.channels.length - 1; i >= 0; i--){
 		let channel = formattedChannel(data.channels[i][0]);
@@ -146,7 +180,32 @@ $(function(){
 	server_socket.on("user_joined", function(data){
 	    //data.user - user who joined the server
 	    //data.channel - channel to put the user in
-	    if (data.user != whoami){	    
+	    if (data.user != whoami){
+		/*
+		var conn = peer_me.connect(data.user);
+		conn.on('open', function(){
+		    conn.send('please work');
+		});*/
+
+		
+		navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+		    /* use the stream */
+		    console.log('call');
+		    var call = peer_me.call(data.user, stream);
+		    call.on('stream', function(remoteStream){
+			console.log("good stuff going on");		    
+		    });
+		}).catch(function(err) {
+		    /* handle the error */
+		    console.log(err);
+		});		    
+		
+		
+		/*call.on('stream', function(remoteStream){
+		    console.log('eyyyyyyyyy');
+		});
+		*/
+		
 		formattedChannelUser(data.user).insertAfter($('#channel-' + data.channel));
 		responsiveVoice.speak(data.user + " has joined the server.");
 	    }
@@ -721,8 +780,6 @@ function readFile(file) {
 $(function(){
     //var io = require('socket.io-client');
     //var ss = require('socket.io-stream');
-
-
     var socket = io.connect('/');
 
     
@@ -931,6 +988,7 @@ function generate_message(user, timestamp, msg, utc, color){
 ///////////////Pure JS Initialization///////////////////
 ////////////////////////////////////////////////////////
 
+/*
 // State
 var me = {};
 var myStream;
@@ -945,15 +1003,15 @@ function init() {
   getLocalAudioStream(function(err, stream) {
     if (err || !stream) return;
 
-    connectToPeerJS(function(err) {
-      if (err) return;
-
-      registerIdWithServer(me.id);
-      display(call.peers.length);
-      if (call.peers.length) callPeers();
-      else displayShareMessage();
-
-    });
+      connectToPeerJS(callId, function(err) {
+	  if (err) return;
+	  
+	  registerIdWithServer(me.id);
+	  display(call.peers.length);
+	  if (call.peers.length) callPeers();
+	  else displayShareMessage();
+	  
+      });
   });
 }
 
@@ -965,22 +1023,22 @@ function init() {
 ///////////////// PEER JS ///////////////////////
 /////////////////////////////////////////////////
 // Connect to PeerJS and get an ID
-function connectToPeerJS(cb) {
-  display('Connecting to PeerJS...');
-  me = new Peer({key: API_KEY});
-
-  me.on('call', handleIncomingCall);
-
-  me.on('open', function() {
-    display('Connected.');
-    display('ID: ' + me.id);
-    cb && cb(null, me);
-  });
-
-  me.on('error', function(err) {
-    display(err);
-    cb && cb(err);
-  });
+function connectToPeerJS(callId, cb) {
+    display('Connecting to PeerJS...');
+    me = new Peer({key: API_KEY});
+    
+    me.on('call', handleIncomingCall);
+    
+    me.on('open', function() {
+	display('Connected.');
+	display('ID: ' + me.id);
+	cb && cb(null, me);
+    });
+    
+    me.on('error', function(err) {
+	display(err);
+	cb && cb(err);
+    });
 }
 
 // Add our ID to the list of PeerJS IDs for this call
@@ -1109,3 +1167,4 @@ function display(message) {
 /////////////////////////////////////////////////
 ///////////////END PEER JS //////////////////////
 /////////////////////////////////////////////////
+*/

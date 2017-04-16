@@ -23,13 +23,20 @@ body{
     position: absolute;
     z-index: 3;
     width: 90%;
-    height: 65%;
+    height: 75%;
 
     top: 20%;
     left: 5%;
 
     animation-duration: 0.5s;
     animation-name: slide-from-top;
+}
+
+@media screen and (min-width: 640px){
+    .flex-wrapper{
+	height: 55%;
+	top: 30%;
+    }
 }
 
 

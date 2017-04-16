@@ -474,22 +474,28 @@ function setupServer(namespace, serverId){
 	socket.emit('startup', { 'message': 'user joined',
 				 'channels': servers[serverId].channels,
 				 'whoami' : socket.handshake.session.user,
+				 'peerJsKey': config.peerjs.key
 			       });
 
 
-	let callId = serverId + users[user].channel;
+	/*
+	let callId = serverId + ":" + users[user].channel;
 	
 	if(calls[callId] === undefined){
-	    calls[callId] = Call.create();
+	    calls[callId].peers = [user];
+	    
+	    
+	    let call = Call.create();
+	    //calls[callId] = Call.create();
 	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-	    socket.emit('peerjsInit');
+	    socket.emit('peerjsInit', { 'id': callId });
 	}
       	else{
 	    //TODO: CALL THE OTHER SERVER
 	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-	    socket.emit('peerjsInit');
+	    socket.emit('peerjsInit', { 'id': callId });
 	}
-
+	*/
 	//join the user to DefaultChannel.
 	socket.join(users[user].channel);
 
@@ -793,12 +799,12 @@ function setupServer(namespace, serverId){
 	    if(calls[callId] === undefined){
 		calls[callId] = Call.create();
 		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-		socket.emit('peerjsInit');
+		socket.emit('peerjsInit', { 'id': callId });
 	    }
       	    else{
 		//TODO: CALL THE OTHER SERVER
 		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-		socket.emit('peerjsInit');
+		socket.emit('peerjsInit', {'id' : callId });
 	    }
 
 	    socket.emit('channel_change_successful', {
@@ -899,16 +905,21 @@ function genSecret(size){
 //////////////////////////////////////////////////////////////////////////////////////
 
 app.post("/add_peer", function(req, res){
-
-	let id = req.body.id;
-	let peerid = req.body.peerid;
-
-	var call = Call.get(id);
-  	if (!call){
-		  res.send({ 'success': false});
-	  }
-	call.addPeer(peerid);
-	res.send({ 'success': true, 'call' : call.toJSON()});
+    let id = req.body.id;
+    let peerid = req.body.peerid;
+    
+    let user = req.session.user;
+    users[user].call_id = id;
+    
+    console.log(id);
+    
+    var call = Call.get(id);
+    if (!call){
+	res.send({ 'success': false});
+    }
+    
+    call.addPeer(peerid);
+    res.send({ 'success': true, 'call' : call.toJSON()});
 
 });
 
