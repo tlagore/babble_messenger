@@ -24,9 +24,6 @@ var validator = require('validator');
 var ss = require('socket.io-stream');
 var path = require('path');
 
-var Call = require('./call');
-var calls = {};
-
 app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
