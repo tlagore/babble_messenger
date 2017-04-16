@@ -24,6 +24,9 @@ var validator = require('validator');
 var ss = require('socket.io-stream');
 var path = require('path');
 
+var Call = require('./call');
+var calls = {};
+
 app.use(cookie_parser());
 app.use(bodyParser.urlencoded({ extended: true }));
 io.use(socketIoCookieParser());
@@ -474,6 +477,19 @@ function setupServer(namespace, serverId){
 			       });
 
 
+	let callId = serverId + users[user].channel;
+	
+	if(calls[callId] === undefined){
+	    calls[callId] = Call.create();
+	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
+	    socket.emit('peerjsInit');
+	}
+      	else{
+	    //TODO: CALL THE OTHER SERVER
+	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
+	    socket.emit('peerjsInit');
+	}
+
 	//join the user to DefaultChannel.
 	socket.join(users[user].channel);
 
@@ -771,6 +787,20 @@ function setupServer(namespace, serverId){
     function updateUserChannelChat(user, server, channel, socket){
 	getMessages(server, channel, function(messages){
 	    //query complete
+
+	    let callId = server + channel;
+
+	    if(calls[callId] === undefined){
+		calls[callId] = Call.create();
+		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
+		socket.emit('peerjsInit');
+	    }
+      	    else{
+		//TODO: CALL THE OTHER SERVER
+		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
+		socket.emit('peerjsInit');
+	    }
+
 	    socket.emit('channel_change_successful', {
 		'user': user,
 		'channel': channel,
@@ -862,3 +892,26 @@ function genSecret(size){
 
     return text;
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//                            Start audio logic                                     //
+//////////////////////////////////////////////////////////////////////////////////////
+
+app.post("/add_peer", function(req, res){
+
+	let id = req.body.id;
+	let peerid = req.body.peerid;
+
+	var call = Call.get(id);
+  	if (!call){
+		  res.send({ 'success': false});
+	  }
+	call.addPeer(peerid);
+	res.send({ 'success': true, 'call' : call.toJSON()});
+
+});
+
+//////////////////////////////////////////////////////////////////////////////////////
+//                            end audio logic                                      //
+//////////////////////////////////////////////////////////////////////////////////////
