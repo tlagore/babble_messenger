@@ -30,12 +30,13 @@ $(function(){
 	valid_char_check(event);
     });
 
-    $('#login_submit').click(function(){	
+    $('#login_submit').click(function(){
 	$.ajax({
 	    url: '/login',
 	    data: {
 		"login_user": $('#login_user').val(),
-		"login_password": $('#login_password').val()
+		"login_password": $('#login_password').val(),
+		"login_server": $('#login_server').val()
 	    },
 	    type: 'POST',
 	    success: function(data){
@@ -138,13 +139,11 @@ function checkUser(user){
 
 function clearRegisterFields(){
     $('#register_user').val('');
-    $('#register_email').val('');
     $('#register_password').val('');
     $('#register_confirm_password').val('');
     $('#register_user').css('background-image', '');
 
     $('#register_user').trigger('blur');
-    $('#register_email').trigger('blur');
     $('#register_password').trigger('blur');
     $('#register_confirm_password').trigger('blur');
 }

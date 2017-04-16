@@ -13,7 +13,6 @@
 	<div class="register-panel">
 	  <h2>Register</h2>
 	  <input onPaste="return false" id="register_user" class="input-default" type="text" maxlength="35" placeholder="User Name">
-	  <input id="register_email" class="input-default" type="text" maxlength="254" placeholder="Email (optional)">
 	  <input id="register_password" class="input-default" type="password" maxlength="75" placeholder="Password">
 	  <input id="register_confirm_password" class="input-default" type="password" maxlength="75" placeholder="Repeat Password">
 	  <div id="register_message" class="info-message"></div>
@@ -27,6 +26,7 @@
 	  <h2>Login</h2>
 	  <input name="login_user" onPaste="return false" id="login_user" class="input-default" type="text" maxlength="35" placeholder="User Name">
 	  <input name="login_password" id="login_password" class="input-default" type="password" maxlength="75" placeholder="Password">
+	  <input name="login_server" id="login_server" class="input-default" type="text" maxlength="6" placeholder="Server ID (Optional)" title="Enter the ID of your friends server. If you leave this blank, or enter an invalid server ID, you will join your own server.">
 	  <div id="login_message" class="info-message"></div>
 	  <div class="bottom-flex">
 	    <input id="login_submit" type="submit" value="login">
@@ -35,11 +35,11 @@
 	</div>
       </div>
     </div>
-
     <script
        src="https://code.jquery.com/jquery-3.1.1.min.js"
        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-       crossorigin="anonymous"></script>
+      crossorigin="anonymous"></script>
+    <!--<link rel="stylesheet" href="/static/jquery-ui.css">-->
     <script src="/static/js/login.js"></script>
   </body>
 </html>

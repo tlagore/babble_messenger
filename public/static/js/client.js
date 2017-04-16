@@ -248,10 +248,12 @@ $(function(){
 	    let channel = data.channel;
 	    let messages = data.messages;
 
+	    mychannel = channel;
+
 	    $('#' + user).insertAfter('#channel-' + channel);
 	    $('#view-messages').empty();
 
-	    $('#channel-' + mychannel).css('color', '#a4a6a8');
+	    $('.channel-header').css('color', '#a4a6a8');
 	    mychannel = channel;
 	    $('#channel-' + mychannel).css('color', 'White');
 
@@ -646,7 +648,7 @@ $(function(){
 	});
 
 	if (user == whoami){
-	    $user.css('color', '#00e2e6');
+	    $user.css('color', "LightGray");// '#00e2e6');
 	}
 
 	$user.appendTo($header);

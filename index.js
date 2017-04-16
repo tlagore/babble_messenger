@@ -144,11 +144,13 @@ app.post("/check_user", function(req, res){
 
 // login request. Check if user and pass are good.
 app.post("/login", function(req, res){
-    let query = "SELECT password, server_id FROM user WHERE user = ?";
+    let query = "SELECT password, server_id FROM user WHERE user = ?;";
+
+    // might want to have next logicx
     let next = req.query.next;
-
-    console.log(next);
-
+    let server = req.body.login_server;
+    console.log(server);
+    
     if(users[req.body.login_user] && users[req.body.login_user].socket.connected){
 	res.send({'success': false,
 		  'message': 'That user is already logged in.'});
@@ -168,18 +170,26 @@ app.post("/login", function(req, res){
 			    req.session.user = req.body.login_user;
 			    users[req.body.login_user] = { "server": undefined,
 							   "channel": undefined };
+
 			}else{
 			    console.log("Failed login attempt for " + req.body.login_user);
 			    message = "Invalid user name or password";
 			}
 			/*res.redirect("/chat/" + row.server_id);*/
-
+			
+			//update to actually redirect
 			if(next){
 			    res.redirect(next);
 			}else{
-			    res.send({ 'success': success,
-				       'server_id': row.server_id,
-				       'message': message });
+			    redirectServer(server, function(server){
+				res.send({ 'success': success,
+					   'server_id': server,
+					   'message': message });				
+			    }, function(){
+				res.send({ 'success': success,
+					   'server_id': row.server_id,
+					   'message': message });
+			    });
 			}
 			
 		    });
@@ -191,6 +201,23 @@ app.post("/login", function(req, res){
 	});
     }
 });
+
+function redirectServer(server, success, fail){
+    //for some reason this function sometimes doesnt work even though the server exists
+    let serverQuery = "SELECT server_id FROM user WHERE server_id = ?;";
+    
+    db.get(serverQuery, server, function(err, row){
+	if(err){
+	    fail();
+	}else{
+	    if(row){
+		success(server);
+	    }else{
+		fail();
+	    }
+	}
+    });
+}
 
 app.get("/", function(req, res, next){
     if(req.session.user){
@@ -229,8 +256,6 @@ app.post("/register", function(req, res){
 				res.send({'success': false, 'message': msg});
 			    }
 			});
-
-			console.log("Good username");
 			res.send({'success': true, 'message': msg});
 		    }
 		});
@@ -284,7 +309,6 @@ app.post("/add_channel", function(req, res){
 					 //server does not already have a channel named 'channel'
 					 if (!row){				
 					     insertChannel(server, channel);
-					     console.log("good channel name: " + channel);
 					     servers[server].server.emit("add_channel", { "channel": channel });
 					 }else{
 					     console.log("A channel with that name already exists on this server.")
@@ -365,9 +389,7 @@ app.get("/chat/:serverId", function(req, res){
 		    console.log(user +  " joined server " + serverId);
 		    //set the server on the users session so that the user on to know where to communicate 
 
-		    //if they were on a server previously, remove them from that channel
-		    
-		    console.log(users[user].channel);
+		    //if they were on a server previously, remove them from that channel	   
 		    if(users[user].channel != undefined){
 			updateChannelUsers(users[user].server, users[user].channel, null, user);
 			users[user].channel = undefined;
@@ -777,18 +799,6 @@ function setupServer(namespace, serverId){
 	    //query complete
 
 	    let callId = server + channel;
-	    /*
-	    if(calls[callId] === undefined){
-		calls[callId] = Call.create();
-		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-		socket.emit('peerjsInit', { 'id': callId });
-	    }
-      	    else{
-		//TODO: CALL THE OTHER SERVER
-		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-		socket.emit('peerjsInit', {'id' : callId });
-	    }*/
-
 	    socket.emit('channel_change_successful', {
 		'user': user,
 		'channel': channel,

@@ -15,8 +15,32 @@ body{
     }
 
     to{
-	top: 12.5%;
+	top: 20%;
     }    
+}
+
+@media screen and (min-width: 640px){
+    @keyframes slide-from-top{
+	from{
+	    top: -100%;
+	}
+
+	to{
+	    top: 30%;
+	}
+    }
+}
+
+@media screen and (min-width: 1080px){
+    @keyframes slide-from-top{
+	from{
+	    top: -100%;
+	}
+
+	to{
+	    top: 25%;
+	}
+    }
 }
 
 .flex-wrapper{
@@ -39,6 +63,12 @@ body{
     }
 }
 
+@media screen and (min-width: 1080px){
+    .flex-wrapper{
+	height: 65%;
+	top: 25%;
+    }
+}
 
 .labeled-input{
     position: relative;
