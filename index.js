@@ -478,24 +478,6 @@ function setupServer(namespace, serverId){
 			       });
 
 
-	/*
-	let callId = serverId + ":" + users[user].channel;
-	
-	if(calls[callId] === undefined){
-	    calls[callId].peers = [user];
-	    
-	    
-	    let call = Call.create();
-	    //calls[callId] = Call.create();
-	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-	    socket.emit('peerjsInit', { 'id': callId });
-	}
-      	else{
-	    //TODO: CALL THE OTHER SERVER
-	    socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
-	    socket.emit('peerjsInit', { 'id': callId });
-	}
-	*/
 	//join the user to DefaultChannel.
 	socket.join(users[user].channel);
 
@@ -795,7 +777,7 @@ function setupServer(namespace, serverId){
 	    //query complete
 
 	    let callId = server + channel;
-
+	    /*
 	    if(calls[callId] === undefined){
 		calls[callId] = Call.create();
 		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
@@ -805,7 +787,7 @@ function setupServer(namespace, serverId){
 		//TODO: CALL THE OTHER SERVER
 		socket.emit('call_peer',{'call' : calls[callId].toJSON(), 'apiKey' : config.peerjs.key});
 		socket.emit('peerjsInit', {'id' : callId });
-	    }
+	    }*/
 
 	    socket.emit('channel_change_successful', {
 		'user': user,

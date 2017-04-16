@@ -120,10 +120,9 @@ $(function(){
 		    /* use the stream */
 		    call.answer(stream);
 		    call.on('stream', function(remoteStream){
-
-			var audio = $('<audio autoplay />').appendTo('body');
+			console.log("connected to " + this.peer);
+			var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
 			audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
-			console.log("received stream");
 		    });
 		}).catch(function(err) {
 		    /* handle the error */
@@ -185,21 +184,12 @@ $(function(){
 		var conn = peer_me.connect(data.user);
 		conn.on('open', function(){
 		    conn.send('please work');
-		});*/
-
-		
-		navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-		    /* use the stream */
-		    console.log('call');
-		    var call = peer_me.call(data.user, stream);
-		    call.on('stream', function(remoteStream){
-			console.log("good stuff going on");		    
-		    });
-		}).catch(function(err) {
-		    /* handle the error */
-		    console.log(err);
-		});		    
-		
+		    });*/
+		if(data.channel == mychannel){
+		    //clear any possible streams we had from that user from disconnecting/reconnecting
+		    $('#audio-'+data.user).remove();
+		    connectToPeer(data.user);		    
+		}
 		
 		/*call.on('stream', function(remoteStream){
 		    console.log('eyyyyyyyyy');
@@ -213,6 +203,21 @@ $(function(){
 	    //Use this to see a list of possible voice types
 	    //alert(JSON.stringify(responsiveVoice.getVoices()));
 	});
+
+	function connectToPeer(user){
+	    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+		/* use the stream */
+		var call = peer_me.call(user, stream);
+		call.on('stream', function(remoteStream){
+		    console.log('connected to ' + this.peer);
+		    var audio = $('<audio id="audio-' + this.peer + '" autoplay />').appendTo('body');
+		    audio[0].src = (URL || webkitURL || mozURL).createObjectURL(remoteStream);			
+		});
+	    }).catch(function(err) {
+		/* handle the error */
+		console.log(err);
+	    });
+	}
 
 	server_socket.on("add_channel", function(data){
 	    formattedChannel(data.channel).insertBefore($('#channels-end'));
@@ -250,6 +255,8 @@ $(function(){
 	    mychannel = channel;
 	    $('#channel-' + mychannel).css('color', 'White');
 
+	    $('audio').remove();
+
 	    for(let i = 0; i < messages.length; i++){
 		let timestamp = messages[i].timestamp;
 		let message_user = messages[i].user;
@@ -271,7 +278,11 @@ $(function(){
 
 	    $('#' + user).insertAfter('#channel-' + channel);
 
-
+	    if(channel == mychannel){
+		connectToPeer(user);
+	    }else{
+		$('#audio-' + data.user).remove();
+	    }
 	});
 
 	server_socket.on('generate_private_messages', function(data){
