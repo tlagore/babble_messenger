@@ -282,7 +282,7 @@ $(function(){
 	    if(sender != $('#pm-cur-user').html()){
 		$.playSound("/static/sounds/communication-channel");
 		let counterDiv = $('#pm-' + sender + '-counter');
-		if(counterDiv.html() == '0'){
+		if(counterDiv.html() == '0' || counterDiv.html() == ''){
 		    counterDiv.html('1');
 		}else{		    
 		    let counter = parseInt(counterDiv.html());
@@ -298,7 +298,6 @@ $(function(){
 		let counter = parseInt($('#pm-counter').html());
 
 		$.playSound("/static/sounds/communication-channel");
-
 		if (counter == 0 || isNaN(counter)){
 		    $('#pm-counter').html('1');
 		}else{
