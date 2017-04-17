@@ -284,9 +284,10 @@ $(function(){
 		let counterDiv = $('#pm-' + sender + '-counter');
 		if(counterDiv.html() == '0'){
 		    counterDiv.html('1');
-		}else{
+		}else{		    
 		    let counter = parseInt(counterDiv.html());
-		    counterDiv.html(counter++);
+		    counter = counter + 1;
+		    counterDiv.html(counter);
 		}
 	    }else{
 		$message = generate_message(sender, time, msg);
